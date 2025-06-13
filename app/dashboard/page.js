@@ -1,281 +1,300 @@
 "use client";
-import { BiMenu, BiBell, BiHome, BiCalendar, BiSearch, BiTransfer, BiUser, BiLogoKickstarter } from "react-icons/bi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { PieChart, Pie, LineChart, Line, XAxis, YAxis, Tooltip, Cell } from 'recharts';
-import Link from "next/link";
 
-// Mock data - replace with real data
-const overallStats = {
-  members: 245,
-  referrals: 789,
-  businesses: 156,
-  meetings: 45
-};
-
-const referralStats = [
-  { name: "Completed", value: 45, color: "#22c55e" },
-  { name: "Pending", value: 30, color: "#eab308" },
-  { name: "Dropped", value: 15, color: "#ef4444" },
-  { name: "Failed", value: 10, color: "#64748b" }
-];
-
-const dailyReferrals = [
-  { date: "Mon", count: 4 },
-  { date: "Tue", count: 6 },
-  { date: "Wed", count: 8 },
-  { date: "Thu", count: 5 },
-  { date: "Fri", count: 7 },
-  { date: "Sat", count: 9 },
-  { date: "Sun", count: 3 }
-];
-
-const meetings = [
-  {
-    id: 1,
-    title: "Weekly Group Meeting",
-    date: "Tomorrow, 10:00 AM",
-    location: "Virtual Meet",
-    attendees: 18
-  },
-  {
-    id: 2,
-    title: "Business Networking",
-    date: "Friday, 2:00 PM",
-    location: "Hotel Taj",
-    attendees: 45
-  }
-];
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Bell,
+  Settings,
+  Users,
+  Handshake,
+  CalendarDays,
+  MessageSquarePlus,
+  X,
+  ChevronRight,
+  Award,
+  UserPlus,
+  TrendingUp,
+  MoreVertical,
+} from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
+  const [showMeetingAlert, setShowMeetingAlert] = useState(true);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [expandedCard, setExpandedCard] = useState(null);
+
+  const achievements = [
+    {
+      id: 1,
+      title: "Referrals",
+      value: "12",
+      icon: UserPlus,
+      details: "8 Successful • 4 Pending",
+      trend: "+3 this month"
+    },
+    {
+      id: 2,
+      title: "Meetings",
+      value: "8/10",
+      icon: CalendarDays,
+      details: "80% Attendance",
+      trend: "Next: Tomorrow"
+    },
+    {
+      id: 3,
+      title: "Goals",
+      value: "85%",
+      icon: TrendingUp,
+      details: "Monthly Target",
+      trend: "5% to reach target"
+    },
+  ];
+
+  const quickActions = [
+    { title: "Directory", icon: Users, href: "/directory" },
+    { title: "Create Referral", icon: Handshake, href: "/referral/new" },
+    { title: "Schedule Meeting", icon: CalendarDays, href: "/meetings/schedule" },
+    { title: "Post Requirement", icon: MessageSquarePlus, href: "/requirements/new" },
+  ];
+
+  const activityFeed = [
+    {
+      type: "meeting",
+      title: "Group Meeting",
+      description: "Monthly progress discussion",
+      time: "2 hours ago",
+      icon: CalendarDays,
+    },
+    {
+      type: "referral",
+      title: "New Referral",
+      description: "John connected with ABC Corp",
+      time: "5 hours ago",
+      icon: Handshake,
+    },
+    {
+      type: "achievement",
+      title: "Goal Achieved",
+      description: "Completed monthly referral target",
+      time: "1 day ago",
+      icon: Award,
+    },
+  ];
+
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col max-w-md mx-auto relative">
+    <main className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white">
-        <div className="flex h-16 items-center px-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="mr-3">
-                <BiMenu className="h-6 w-6" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[80%]">
-              <div className="py-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <BiLogoKickstarter className="h-8 w-8 text-primary" />
-                  <h2 className="text-xl font-semibold">Kattunar Kuzhu</h2>
-                </div>
-                <Separator className="mb-6" />
-                <nav className="space-y-4">
-                  <Link href="/dashboard" className="flex items-center gap-3 text-primary">
-                    <BiHome className="h-5 w-5" />
-                    <span>Home</span>
-                  </Link>
-                  <Link href="/meetings" className="flex items-center gap-3">
-                    <BiCalendar className="h-5 w-5" />
-                    <span>Meetings</span>
-                  </Link>
-                  <Link href="/search" className="flex items-center gap-3">
-                    <BiSearch className="h-5 w-5" />
-                    <span>Search Businesses</span>
-                  </Link>
-                  <Link href="/referrals" className="flex items-center gap-3">
-                    <BiTransfer className="h-5 w-5" />
-                    <span>Referrals</span>
-                  </Link>
-                  <Link href="/profile" className="flex items-center gap-3">
-                    <BiUser className="h-5 w-5" />
-                    <span>Profile</span>
-                  </Link>
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <div className="flex items-center gap-2">
-            <BiLogoKickstarter className="h-7 w-7 text-primary" />
-            <span className="font-semibold text-lg">KK</span>
-          </div>
-
-          <div className="flex-1"></div>
-
-          <button className="relative">
-            <BiBell className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+      <div className="fixed top-0 left-0 right-0 bg-white border-b z-40 px-4 py-3">
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-3 active:opacity-70"
+          >
+            <div className="relative w-10 h-10">
+              <Image
+                src="/placeholder-avatar.jpg"
+                alt="Profile"
+                fill
+                className="rounded-full object-cover border-2 border-gray-100"
+              />
+            </div>
+            <div>
+              <h2 className="font-medium text-gray-900">John Doe</h2>
+              <p className="text-xs text-gray-500">Group 5</p>
+            </div>
           </button>
+          <div className="flex items-center gap-4">
+            <button className="relative active:opacity-70">
+              <Bell className="w-6 h-6 text-gray-600" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gray-900 rounded-full" />
+            </button>
+            <button className="active:opacity-70">
+              <Settings className="w-6 h-6 text-gray-600" />
+            </button>
+          </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <ScrollArea className="flex-1">
-        <div className="px-4 pb-20">
-          {/* Overall Statistics */}
-          <section className="grid grid-cols-2 gap-3 mt-4">
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="text-sm text-muted-foreground font-medium">Members</div>
-                <div className="text-2xl font-bold mt-1">{overallStats.members}</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="text-sm text-muted-foreground font-medium">Referrals</div>
-                <div className="text-2xl font-bold mt-1">{overallStats.referrals}</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="text-sm text-muted-foreground font-medium">Businesses</div>
-                <div className="text-2xl font-bold mt-1">{overallStats.businesses}</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white shadow-sm">
-              <CardContent className="p-4">
-                <div className="text-sm text-muted-foreground font-medium">Meetings</div>
-                <div className="text-2xl font-bold mt-1">{overallStats.meetings}</div>
-              </CardContent>
-            </Card>
+      <div className="pt-16 pb-20 px-4">
+        <div className="max-w-lg mx-auto space-y-6">
+          {/* Meeting Alert */}
+          {showMeetingAlert && (
+            <div
+              className="relative touch-pan-x"
+              onTouchMove={(e) => {
+                if (e.touches[0].clientX < 50) {
+                  setShowMeetingAlert(false);
+                }
+              }}
+            >
+              <Card className="bg-gray-900 text-white p-4 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">Today&apos;s Meeting</h3>
+                    <p className="text-sm text-gray-300 mt-1">
+                      10:00 AM - Group Discussion
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      className="rounded-xl bg-white text-gray-900 hover:bg-gray-100"
+                    >
+                      Mark Attendance
+                    </Button>
+                    <button
+                      onClick={() => setShowMeetingAlert(false)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </Card>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                Swipe left to dismiss
+              </p>
+            </div>
+          )}
+
+          {/* Achievement Cards */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="font-medium text-gray-900">Your Progress</h3>
+              <Button variant="ghost" className="text-sm text-gray-600 p-0">
+                View Details
+              </Button>
+            </div>
+            <ScrollArea>
+              <div className="flex gap-4 pb-4">
+                {achievements.map((achievement) => {
+                  const Icon = achievement.icon;
+                  return (
+                    <Card
+                      key={achievement.id}
+                      className={cn(
+                        "flex-shrink-0 w-40 p-4 rounded-2xl transition-all duration-200",
+                        expandedCard === achievement.id
+                          ? "bg-gray-900 text-white"
+                          : "bg-white hover:bg-gray-50"
+                      )}
+                      onClick={() => setExpandedCard(
+                        expandedCard === achievement.id ? null : achievement.id
+                      )}
+                    >
+                      <div className={cn(
+                        "w-8 h-8 rounded-xl flex items-center justify-center mb-2",
+                        expandedCard === achievement.id
+                          ? "bg-white text-gray-900"
+                          : "bg-gray-100 text-gray-600"
+                      )}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <p className={cn(
+                        "text-sm",
+                        expandedCard === achievement.id
+                          ? "text-gray-300"
+                          : "text-gray-600"
+                      )}>
+                        {achievement.title}
+                      </p>
+                      <p className="text-2xl font-semibold mt-1">
+                        {achievement.value}
+                      </p>
+                      {expandedCard === achievement.id && (
+                        <div className="mt-3 space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                          <p className="text-sm text-gray-300">{achievement.details}</p>
+                          <p className="text-xs text-gray-400">{achievement.trend}</p>
+                        </div>
+                      )}
+                    </Card>
+                  );
+                })}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </section>
 
-          {/* Referral Statistics */}
-          <Card className="mt-6 bg-white shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Referral Statistics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-center">
-                <PieChart width={200} height={200}>
-                  <Pie
-                    data={referralStats}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
+          {/* Quick Actions */}
+          <section className="space-y-4">
+            <h3 className="font-medium text-gray-900 px-1">Quick Actions</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Card
+                    key={action.title}
+                    className="p-4 rounded-2xl bg-white hover:bg-gray-50 transition-all active:scale-95"
                   >
-                    {referralStats.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {referralStats.map((stat) => (
-                  <div key={stat.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: stat.color }} />
-                    <span className="text-sm">{stat.name}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Daily Referrals */}
-          <Card className="mt-6 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Daily Referrals</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mt-2">
-                <LineChart width={320} height={200} data={dailyReferrals} margin={{ left: -20 }}>
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="#2563eb" 
-                    strokeWidth={2}
-                    dot={{ fill: '#2563eb' }}
-                  />
-                </LineChart>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Own Statistics */}
-          <Card className="mt-6 bg-white shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Your Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">12</div>
-                  <div className="text-sm text-muted-foreground mt-1">Referrals</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">5</div>
-                  <div className="text-sm text-muted-foreground mt-1">Posts</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">8</div>
-                  <div className="text-sm text-muted-foreground mt-1">Meetings</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Meetings */}
-          <section className="mt-6 mb-4">
-            <h2 className="text-lg font-semibold mb-3">Upcoming Meetings</h2>
-            <div className="space-y-3">
-              {meetings.map((meeting) => (
-                <Card key={meeting.id} className="bg-white shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-base">{meeting.title}</h3>
-                        <div className="flex items-center gap-2 mt-2">
-                          <BiCalendar className="text-muted-foreground w-4 h-4" />
-                          <p className="text-sm text-muted-foreground">{meeting.date}</p>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <BiHome className="text-muted-foreground w-4 h-4" />
-                          <p className="text-sm text-muted-foreground">{meeting.location}</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-gray-600" />
                       </div>
-                      <div className="text-sm text-primary font-medium">
-                        {meeting.attendees} attendees
+                      <span className="font-medium text-gray-900">{action.title}</span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Activity Feed */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="font-medium text-gray-900">Recent Activity</h3>
+              <Button variant="ghost" className="text-sm text-gray-600 p-0 gap-2">
+                Filter
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {activityFeed.map((activity, index) => {
+                const Icon = activity.icon;
+                return (
+                  <Card
+                    key={index}
+                    className="p-4 rounded-2xl bg-white hover:bg-gray-50 transition-all active:scale-98"
+                  >
+                    <div className="flex gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-gray-100 flex-shrink-0 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-gray-900">
+                            {activity.title}
+                          </h4>
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {activity.description}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-2">
+                          {activity.time}
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           </section>
         </div>
-      </ScrollArea>
+      </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 border-t bg-white shadow-lg max-w-md mx-auto">
-        <div className="grid h-full grid-cols-5 items-center">
-          <Link href="/dashboard" className="flex flex-col items-center text-primary">
-            <BiHome className="h-6 w-6" />
-            <span className="text-xs mt-0.5">Home</span>
-          </Link>
-          <Link href="/meetings" className="flex flex-col items-center text-muted-foreground">
-            <BiCalendar className="h-6 w-6" />
-            <span className="text-xs mt-0.5">Meetings</span>
-          </Link>
-          <Link href="/search" className="flex flex-col items-center text-muted-foreground">
-            <BiSearch className="h-6 w-6" />
-            <span className="text-xs mt-0.5">Search</span>
-          </Link>
-          <Link href="/referrals" className="flex flex-col items-center text-muted-foreground">
-            <BiTransfer className="h-6 w-6" />
-            <span className="text-xs mt-0.5">Referrals</span>
-          </Link>
-          <Link href="/profile" className="flex flex-col items-center text-muted-foreground">
-            <BiUser className="h-6 w-6" />
-            <span className="text-xs mt-0.5">Profile</span>
-          </Link>
-        </div>
-      </nav>
+      {/* Profile Sheet */}
+      <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
+        <SheetContent side="left" className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Profile</SheetTitle>
+          </SheetHeader>
+          {/* Add profile content here */}
+        </SheetContent>
+      </Sheet>
     </main>
   );
 }
