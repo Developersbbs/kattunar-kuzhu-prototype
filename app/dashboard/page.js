@@ -4,6 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FiArrowUpRight } from "react-icons/fi";
+import { FiArrowDownLeft } from "react-icons/fi";
+
+
 import { 
   Bell, 
   Users, 
@@ -15,7 +19,8 @@ import {
   Clock,
   ChevronUp,
   X,
-  Activity 
+  Activity,
+  Plus 
 } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
@@ -315,25 +320,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Line Chart - Monthly Requirement Posts */}
-      <div className="px-5 py-4">
-        <Card className="p-4 bg-white">
-          <h2 className="text-lg font-semibold mb-4">Monthly Requirement Posts</h2>
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={monthlyPosts}>
-                <XAxis dataKey="month" stroke="#8884d8" />
-                <YAxis />
-                <Tooltip />
-                <Line type="monotone" dataKey="posts" stroke="#8884d8" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
-
-      {/* Requirements Posts Chart */}
-      <div className="px-5 py-4">
+      {/* Requirements Posts Chart and Quick Actions Grid */}
+      <div className="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Requirements Posts Chart */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
@@ -412,6 +401,46 @@ export default function Dashboard() {
             <div className="flex items-center gap-1 text-green-600">
               <TrendingUp className="w-4 h-4" />
               <span className="text-sm font-medium">+12.5%</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-gray-100 rounded-xl">
+                <Handshake className="w-4 h-4 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="font-medium">Manage Referrals</h3>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {/* Referral Actions */}
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
+              >
+                <FiArrowUpRight />
+                Given
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
+              >
+                <FiArrowDownLeft />
+                Taken
+              </Button>
+              <Button
+                size="icon"
+                className="h-10 w-10 rounded-full bg-black text-white hover:bg-gray-800"
+              >
+                <Plus className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         </Card>
