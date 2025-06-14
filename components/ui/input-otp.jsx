@@ -39,29 +39,37 @@ const InputOTPSlot = React.forwardRef(({
   hasFakeCaret,
   isActive,
   className,
+  placeholderChar,  // Explicitly extract placeholderChar
   ...props
-}, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "relative h-10 w-10 rounded-md text-center text-base font-medium ring-offset-background",
-      "border border-input bg-transparent",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      "animate-in fade-in-0 zoom-in-50",
-      "flex items-center justify-center",
-      isActive && "border-primary ring-2 ring-primary ring-offset-2",
-      className
-    )}
-    {...props}
-  >
-    {char}
-    {hasFakeCaret && (
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-4 w-px animate-caret-blink bg-primary duration-500" />
-      </div>
-    )}
-  </div>
-))
+}, ref) => {
+  // Remove placeholderChar from props to avoid DOM warning
+  const displayChar = char || (placeholderChar && 
+    <span className="text-muted-foreground">{placeholderChar}</span>
+  )
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "relative h-10 w-10 rounded-md text-center text-base font-medium ring-offset-background",
+        "border border-input bg-transparent",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "animate-in fade-in-0 zoom-in-50",
+        "flex items-center justify-center",
+        isActive && "border-primary ring-2 ring-primary ring-offset-2",
+        className
+      )}
+      {...props}
+    >
+      {displayChar}
+      {hasFakeCaret && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-4 w-px animate-caret-blink bg-primary duration-500" />
+        </div>
+      )}
+    </div>
+  )
+})
 InputOTPSlot.displayName = "InputOTPSlot"
 
 const InputOTPSeparator = React.forwardRef(({ ...props }, ref) => (
