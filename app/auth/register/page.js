@@ -149,7 +149,7 @@ export default function Register() {
 	};
 
 	return (
-		<main className="min-h-screen bg-background p-6">
+		<main className="min-h-screen bg-background p-6 rounded-3xl ">
 			<Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader className="flex flex-col items-center text-center">
@@ -163,7 +163,7 @@ export default function Register() {
 			</Dialog>
 			
 			{/* Logo */}
-			<div className="fixed top-0 left-0 right-0 flex justify-center items-center py-6 bg-background border-b z-10">
+			<div className="fixed top-0 left-0 right-0 flex justify-center items-center py-6 bg-background border-b z-10 mt-5">
 				<div className="flex items-center gap-2">
 					<div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
 						<BiLogoKickstarter className="w-6 h-6 text-primary" />
