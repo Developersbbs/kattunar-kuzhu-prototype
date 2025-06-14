@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,16 +33,32 @@ const meetings = [
     id: 1,
     type: "group",
     title: "Weekly Business Network",
-    description: "Weekly meeting to discuss business opportunities and network with members",
+    description:
+      "Weekly meeting to discuss business opportunities and network with members",
     date: new Date(2025, 5, 14),
     time: "10:00 AM - 12:00 PM",
     location: "Main Hall, Business Center",
     locationDetails: "2nd Floor, Near Reception",
     organizer: "John Smith",
     attendees: [
-      { id: 1, name: "John Smith", role: "Organizer", avatar: "/path-to-avatar.jpg" },
-      { id: 2, name: "Sarah Wilson", role: "Co-host", avatar: "/path-to-avatar.jpg" },
-      { id: 3, name: "Mike Johnson", role: "Member", avatar: "/path-to-avatar.jpg" },
+      {
+        id: 1,
+        name: "John Smith",
+        role: "Organizer",
+        avatar: "/path-to-avatar.jpg",
+      },
+      {
+        id: 2,
+        name: "Sarah Wilson",
+        role: "Co-host",
+        avatar: "/path-to-avatar.jpg",
+      },
+      {
+        id: 3,
+        name: "Mike Johnson",
+        role: "Member",
+        avatar: "/path-to-avatar.jpg",
+      },
     ],
     totalAttendees: 15,
     status: "ongoing",
@@ -49,9 +66,10 @@ const meetings = [
       "Network Introduction - 15m",
       "Member Presentations - 45m",
       "Open Discussion - 30m",
-      "Next Steps - 30m"
+      "Next Steps - 30m",
     ],
-    previousMeetingNotes: "Discussed 5 new business opportunities, 3 successful referrals"
+    previousMeetingNotes:
+      "Discussed 5 new business opportunities, 3 successful referrals",
   },
   {
     id: 2,
@@ -72,6 +90,7 @@ export default function MeetingsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
+  const router = useRouter();
 
   // Function to check if a date has meetings
   const hasMeeting = (date) => {
@@ -90,13 +109,13 @@ export default function MeetingsPage() {
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-col">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
                 <span>{format(new Date(), "h:mm a, MMMM d, yyyy")}</span>
               </div>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="h-8"
                 disabled={isMarkingAttendance}
                 onClick={() => {
@@ -113,7 +132,7 @@ export default function MeetingsPage() {
                     Marking... <Clock className="w-4 h-4 animate-spin" />
                   </span>
                 ) : (
-                  "Mark Attendance"
+                  "Confirm Attedance"
                 )}
               </Button>
             </div>
@@ -141,20 +160,24 @@ export default function MeetingsPage() {
     };
 
     return (
-      <Card className={cn(
-        "p-4",
-        meeting.status === "ongoing" && "border-2 border-black"
-      )}>
+      <Card
+        className={cn(
+          "p-4",
+          meeting.status === "ongoing" && "border-2 border-black"
+        )}
+      >
         {/* Header */}
         <div className="space-y-4">
           {/* Title Section */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <div className={cn(
-                  "w-2 h-2 rounded-full",
-                  getStatusColor(meeting.status)
-                )} />
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    getStatusColor(meeting.status)
+                  )}
+                />
                 <span className="text-xs font-medium uppercase text-gray-500">
                   {meeting.type}
                 </span>
@@ -190,20 +213,26 @@ export default function MeetingsPage() {
               <Users className="w-4 h-4" />
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
-                  {Array.isArray(meeting.attendees) && meeting.attendees
-                    .slice(0, 3)
-                    .map((attendee) => (
+                  {Array.isArray(meeting.attendees) &&
+                    meeting.attendees.slice(0, 3).map((attendee) => (
                       <div
                         key={attendee?.id || Math.random()}
                         className="w-6 h-6 rounded-full bg-gray-200 ring-2 ring-white flex items-center justify-center"
                       >
-                        <span className="text-[10px]">{attendee?.name?.[0] || '?'}</span>
+                        <span className="text-[10px]">
+                          {attendee?.name?.[0] || "?"}
+                        </span>
                       </div>
                     ))}
                 </div>
                 {meeting.totalAttendees > 3 && (
                   <span className="text-xs text-gray-500">
-                    +{meeting.totalAttendees - (Array.isArray(meeting.attendees) ? Math.min(meeting.attendees.length, 3) : 0)} more
+                    +
+                    {meeting.totalAttendees -
+                      (Array.isArray(meeting.attendees)
+                        ? Math.min(meeting.attendees.length, 3)
+                        : 0)}{" "}
+                    more
                   </span>
                 )}
               </div>
@@ -310,7 +339,11 @@ export default function MeetingsPage() {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Users className="w-4 h-4" />
-                            <span>{meeting.totalAttendees || meeting.attendees.length} Attendees</span>
+                            <span>
+                              {meeting.totalAttendees ||
+                                meeting.attendees.length}{" "}
+                              Attendees
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -336,12 +369,14 @@ export default function MeetingsPage() {
           <div className="px-5 space-y-6">
             {/* Ongoing Meetings */}
             <section>
-              <h2 className="text-sm font-medium text-gray-600 mb-3">Ongoing</h2>
+              <h2 className="text-sm font-medium text-gray-600 mb-3">
+                Ongoing
+              </h2>
               {meetings
                 .filter((meeting) => meeting.status === "ongoing")
                 .map((meeting) => (
-                  <MeetingCard 
-                    key={meeting.id} 
+                  <MeetingCard
+                    key={meeting.id}
                     meeting={meeting}
                     onAttendanceClick={() => setShowAttendanceDialog(true)}
                   />
@@ -350,13 +385,15 @@ export default function MeetingsPage() {
 
             {/* Upcoming Meetings */}
             <section>
-              <h2 className="text-sm font-medium text-gray-600 mb-3">Upcoming</h2>
+              <h2 className="text-sm font-medium text-gray-600 mb-3">
+                Upcoming
+              </h2>
               <div className="space-y-3">
                 {meetings
                   .filter((meeting) => meeting.status === "upcoming")
                   .map((meeting) => (
-                    <MeetingCard 
-                      key={meeting.id} 
+                    <MeetingCard
+                      key={meeting.id}
                       meeting={meeting}
                       onAttendanceClick={() => setShowAttendanceDialog(true)}
                     />
@@ -402,20 +439,20 @@ export default function MeetingsPage() {
         {/* One-on-One Tab */}
         <TabsContent value="one-on-one" className="mt-0">
           <div className="px-5 space-y-6">
-            <Button 
+            <Button
               className="w-full bg-black hover:bg-gray-800 rounded-xl h-12"
-              onClick={() => {
-                // Handle scheduling new one-on-one
-              }}
+              onClick={() => router.push("/meeting/schedule/member-search")}
             >
               Schedule One-on-One Meeting
             </Button>
 
             {/* Upcoming One-on-One */}
             <section>
-              <h2 className="text-sm font-medium text-gray-600 mb-3">Upcoming</h2>
+              <h2 className="text-sm font-medium text-gray-600 mb-3">
+                Upcoming
+              </h2>
               <Card className="p-4">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">Product Discussion</h3>
@@ -434,18 +471,18 @@ export default function MeetingsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="w-full flex items-center gap-2 mt-4">
                     <Button
                       size="sm"
                       variant="outline"
-                      className="h-8 border-red-200 hover:bg-red-50 hover:text-red-600"
+                      className="h-8 border-red-200 hover:bg-red-50 hover:text-red-600 flex-1"
                     >
                       <X className="w-4 h-4 mr-1" />
                       Decline
                     </Button>
                     <Button
                       size="sm"
-                      className="h-8 bg-black hover:bg-gray-800"
+                      className="h-8 bg-black hover:bg-gray-800 flex-1"
                     >
                       <Check className="w-4 h-4 mr-1" />
                       Accept
@@ -453,6 +490,28 @@ export default function MeetingsPage() {
                   </div>
                 </div>
               </Card>
+              <div className="space-y-3 mt-4">
+                <Card className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-medium">Business Proposal</h3>
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="w-4 h-4" />
+                          <span>June 10, 3:00 PM</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Users className="w-4 h-4" />
+                          <span>with Sarah Wilson</span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="shrink-0 h-8">
+                      View Details
+                    </Button>
+                  </div>
+                </Card>
+              </div>
             </section>
 
             {/* Past One-on-One */}
@@ -474,11 +533,7 @@ export default function MeetingsPage() {
                         </div>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0 h-8"
-                    >
+                    <Button variant="ghost" size="sm" className="shrink-0 h-8">
                       View Details
                     </Button>
                   </div>
@@ -491,7 +546,7 @@ export default function MeetingsPage() {
 
       {/* Attendance Dialog */}
       <AttendanceDialog />
-      
+
       {/* Mobile Navigation */}
       <MobileNav />
     </main>
