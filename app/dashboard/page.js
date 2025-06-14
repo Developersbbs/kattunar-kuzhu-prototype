@@ -7,11 +7,10 @@ import { cn } from "@/lib/utils";
 import { FiArrowUpRight } from "react-icons/fi";
 import { FiArrowDownLeft } from "react-icons/fi";
 
-
-import { 
-  Bell, 
-  Users, 
-  Handshake, 
+import {
+  Bell,
+  Users,
+  Handshake,
   CalendarDays,
   MessageSquarePlus,
   TrendingUp,
@@ -20,21 +19,28 @@ import {
   ChevronUp,
   X,
   Activity,
-  Plus 
+  Plus,
 } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
 import { MobileNav } from "@/components/mobile-nav";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 // Mock data for the line chart
 const monthlyPosts = [
-  { month: 'Jan', posts: 25 },
-  { month: 'Feb', posts: 32 },
-  { month: 'Mar', posts: 28 },
-  { month: 'Apr', posts: 45 },
-  { month: 'May', posts: 38 },
-  { month: 'Jun', posts: 52 }
+  { month: "Jan", posts: 25 },
+  { month: "Feb", posts: 32 },
+  { month: "Mar", posts: 28 },
+  { month: "Apr", posts: 45 },
+  { month: "May", posts: 38 },
+  { month: "Jun", posts: 52 },
 ];
 
 export default function Dashboard() {
@@ -44,7 +50,7 @@ export default function Dashboard() {
   const [dragOffset, setDragOffset] = useState(0);
   const alertRef = useRef(null);
   const touchStartY = useRef(0);
-  
+
   // Handle touch events for swipe to dismiss
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -78,14 +84,14 @@ export default function Dashboard() {
       referrals: {
         total: 15,
         target: 20,
-        growth: "+3 this month"
+        growth: "+3 this month",
       },
       meetings: {
         attended: 8,
         total: 10,
-        nextDate: "Tomorrow, 10:00 AM"
-      }
-    }
+        nextDate: "Tomorrow, 10:00 AM",
+      },
+    },
   };
 
   // Mock meeting data - replace with real data later
@@ -96,7 +102,7 @@ export default function Dashboard() {
       time: "10:00 AM",
       date: "Tomorrow",
       attendees: 5,
-      status: "upcoming"
+      status: "upcoming",
     },
     {
       id: 2,
@@ -104,7 +110,7 @@ export default function Dashboard() {
       time: "1:00 PM",
       date: "Tomorrow",
       attendees: 3,
-      status: "upcoming"
+      status: "upcoming",
     },
     {
       id: 3,
@@ -112,8 +118,8 @@ export default function Dashboard() {
       time: "3:00 PM",
       date: "Tomorrow",
       attendees: 8,
-      status: "completed"
-    }
+      status: "completed",
+    },
   ];
 
   return (
@@ -136,15 +142,13 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
-            
+
             {/* Greeting and Phone */}
             <div>
               <h1 className="text-base font-medium text-gray-900">
                 Good Morning, {user.name}
               </h1>
-              <p className="text-sm text-gray-500 mt-0.5">
-                {user.business}
-              </p>
+              <p className="text-sm text-gray-500 mt-0.5">{user.business}</p>
             </div>
           </div>
 
@@ -167,7 +171,6 @@ export default function Dashboard() {
 
       {/* Meeting Alert - Swipe to Dismiss Demo */}
 
-
       {/* Meeting Alert */}
       {showMeetingAlert && (
         <div className="px-5 py-2">
@@ -187,7 +190,7 @@ export default function Dashboard() {
             <Card className="bg-gradient-to-r from-gray-900 to-gray-800 text-white p-4 relative overflow-hidden">
               {/* Swipe indicator */}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-white/20 rounded-full" />
-              
+
               {/* Close button */}
               <button
                 onClick={() => setShowMeetingAlert(false)}
@@ -200,12 +203,16 @@ export default function Dashboard() {
                 {/* Meeting Time */}
                 <div className="flex items-center gap-2 mb-3">
                   <Clock className="w-4 h-4 text-white/80" />
-                  <span className="text-sm font-medium text-white/80">Today&apos;s Meeting</span>
+                  <span className="text-sm font-medium text-white/80">
+                    Today&apos;s Meeting
+                  </span>
                 </div>
 
                 {/* Meeting Details */}
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Weekly Business Meet</h3>
+                  <h3 className="text-lg font-semibold">
+                    Weekly Business Meet
+                  </h3>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="flex -space-x-2">
@@ -228,7 +235,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Action Button */}
-                <Button 
+                <Button
                   className="w-full mt-4 bg-white text-gray-900 hover:bg-gray-100"
                   onClick={() => {
                     // Handle attendance marking
@@ -244,7 +251,7 @@ export default function Dashboard() {
       )}
 
       {/* Statistics Scroll Section */}
-      <div className="px-5 py-4 overflow-hidden">
+      <div className="px-5 overflow-hidden">
         <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide -mx-1 px-1">
           {/* Referrals Card */}
           <Card className="flex-shrink-0 w-[280px] p-4 bg-white">
@@ -254,18 +261,24 @@ export default function Dashboard() {
                   <div className="p-2 bg-gray-100 rounded-xl">
                     <Handshake className="w-4 h-4 text-gray-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Referrals</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Referrals
+                  </span>
                 </div>
                 <h3 className="text-2xl font-semibold mt-2">248</h3>
                 <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs font-medium text-green-600">+12%</span>
+                  <span className="text-xs font-medium text-green-600">
+                    +12%
+                  </span>
                   <span className="text-xs text-gray-500">vs last week</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-sm text-gray-500">This month</span>
                 <span className="text-lg font-medium mt-1">+45</span>
-                <span className="text-xs text-gray-500 mt-1">vs 32 last month</span>
+                <span className="text-xs text-gray-500 mt-1">
+                  vs 32 last month
+                </span>
               </div>
             </div>
           </Card>
@@ -278,18 +291,24 @@ export default function Dashboard() {
                   <div className="p-2 bg-gray-100 rounded-xl">
                     <MessageSquarePlus className="w-4 h-4 text-gray-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Requirements</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Requirements
+                  </span>
                 </div>
                 <h3 className="text-2xl font-semibold mt-2">156</h3>
                 <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs font-medium text-green-600">+8%</span>
+                  <span className="text-xs font-medium text-green-600">
+                    +8%
+                  </span>
                   <span className="text-xs text-gray-500">vs last week</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-sm text-gray-500">This month</span>
                 <span className="text-lg font-medium mt-1">+28</span>
-                <span className="text-xs text-gray-500 mt-1">vs 24 last month</span>
+                <span className="text-xs text-gray-500 mt-1">
+                  vs 24 last month
+                </span>
               </div>
             </div>
           </Card>
@@ -302,18 +321,24 @@ export default function Dashboard() {
                   <div className="p-2 bg-gray-100 rounded-xl">
                     <CalendarDays className="w-4 h-4 text-gray-600" />
                   </div>
-                  <span className="text-sm font-medium text-gray-600">Active Meetings</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Active Meetings
+                  </span>
                 </div>
                 <h3 className="text-2xl font-semibold mt-2">42</h3>
                 <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs font-medium text-green-600">+15%</span>
+                  <span className="text-xs font-medium text-green-600">
+                    +15%
+                  </span>
                   <span className="text-xs text-gray-500">vs last week</span>
                 </div>
               </div>
               <div className="flex flex-col items-end">
                 <span className="text-sm text-gray-500">This month</span>
                 <span className="text-lg font-medium mt-1">+12</span>
-                <span className="text-xs text-gray-500 mt-1">vs 8 last month</span>
+                <span className="text-xs text-gray-500 mt-1">
+                  vs 8 last month
+                </span>
               </div>
             </div>
           </Card>
@@ -350,26 +375,26 @@ export default function Dashboard() {
                   bottom: 5,
                 }}
               >
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fontSize: 12, fill: '#6B7280' }}
-                  axisLine={{ stroke: '#E5E7EB' }}
-                  tickLine={{ stroke: '#E5E7EB' }}
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: "#6B7280" }}
+                  axisLine={{ stroke: "#E5E7EB" }}
+                  tickLine={{ stroke: "#E5E7EB" }}
                 />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#6B7280' }}
-                  axisLine={{ stroke: '#E5E7EB' }}
-                  tickLine={{ stroke: '#E5E7EB' }}
+                <YAxis
+                  tick={{ fontSize: 12, fill: "#6B7280" }}
+                  axisLine={{ stroke: "#E5E7EB" }}
+                  tickLine={{ stroke: "#E5E7EB" }}
                   width={30}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#FFF',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    backgroundColor: "#FFF",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                   }}
-                  labelStyle={{ color: '#111827', fontWeight: 500 }}
+                  labelStyle={{ color: "#111827", fontWeight: 500 }}
                 />
                 <Line
                   type="monotone"
@@ -378,14 +403,14 @@ export default function Dashboard() {
                   strokeWidth={2}
                   dot={{
                     r: 4,
-                    fill: '#FFF',
-                    stroke: '#111827',
+                    fill: "#FFF",
+                    stroke: "#111827",
                     strokeWidth: 2,
                   }}
                   activeDot={{
                     r: 6,
-                    fill: '#111827',
-                    stroke: '#FFF',
+                    fill: "#111827",
+                    stroke: "#FFF",
                     strokeWidth: 2,
                   }}
                 />
@@ -405,15 +430,17 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Quick Actions */}
+        {/* Quick Actions Card */}
         <Card className="p-4">
+          {/* Quick Actions Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-gray-100 rounded-xl">
                 <Handshake className="w-4 h-4 text-gray-600" />
               </div>
               <div>
-                <h3 className="font-medium">Manage Referrals</h3>
+                <h3 className="font-medium">Quick Actions</h3>
+                <p className="text-sm text-gray-500">Manage referrals</p>
               </div>
             </div>
           </div>
@@ -421,18 +448,16 @@ export default function Dashboard() {
           <div className="space-y-4">
             {/* Referral Actions */}
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
               >
-                <FiArrowUpRight />
                 Given
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
               >
-                <FiArrowDownLeft />
                 Taken
               </Button>
               <Button
@@ -441,6 +466,93 @@ export default function Dashboard() {
               >
                 <Plus className="h-5 w-5" />
               </Button>
+            </div>
+
+            {/* Upcoming Meetings Section */}
+            <div className="mt-8 pt-6 border-t">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-gray-100 rounded-xl">
+                    <CalendarDays className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">
+                    Upcoming Meetings
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-7 px-2 hover:bg-gray-100"
+                >
+                  View All
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Today's Meeting */}
+                <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
+                  <div className="bg-gray-50 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 bg-black rounded-full"></div>
+                        <span className="text-xs font-medium text-gray-500">
+                          Today
+                        </span>
+                      </div>
+                      <div className="px-2 py-1 rounded-full bg-black text-white text-xs">
+                        Now
+                      </div>
+                    </div>
+                    <h4 className="text-sm font-medium mb-1">
+                      Weekly Business Network
+                    </h4>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>10:00 AM - 12:00 PM</span>
+                    </div>
+                    <div className="flex items-center justify-end mt-3 pt-2 border-t border-gray-200/50">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-4 text-xs font-medium bg-black text-white hover:bg-gray-900"
+                      >
+                        Mark Attedance
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Tomorrow's Meeting */}
+                <Card className="overflow-hidden hover:shadow-md transition-shadow duration-200">
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 bg-gray-300 rounded-full"></div>
+                        <span className="text-xs font-medium text-gray-500">
+                          Tomorrow
+                        </span>
+                      </div>
+                      <div className="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium">
+                        10:00 AM
+                      </div>
+                    </div>
+                    <h4 className="text-sm font-medium mb-1">Product Showcase</h4>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>10:00 AM - 11:30 AM</span>
+                    </div>
+                    <div className="flex items-center justify-end mt-3 pt-2 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-4 text-xs font-medium hover:bg-gray-50"
+                      >
+                        Remind Me
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
           </div>
         </Card>
