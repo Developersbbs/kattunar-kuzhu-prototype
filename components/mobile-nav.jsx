@@ -27,7 +27,7 @@ export function MobileNav() {
     {
       label: "Meetings",
       icon: CalendarDays,
-      href: "/meetings",
+      href: "/meeting",
     },
     {
       label: "Search",
