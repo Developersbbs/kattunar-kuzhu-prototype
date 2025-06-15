@@ -48,7 +48,7 @@ export function MobileNav() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 bg-gradient-to-t from-white via-white to-white/80">
-      <Card className="border shadow-lg bg-white rounded-full backdrop-blur-md">
+      <Card className="border shadow-lg bg-gray-800 rounded-full backdrop-blur-md">
         <nav className="flex items-center justify-between p-2">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -60,8 +60,8 @@ export function MobileNav() {
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "flex-1 flex items-center justify-center h-14 relative group transition-all duration-200 hover:bg-gray-50 rounded-xl",
-                  isActive ? "text-black" : "text-gray-400 hover:text-gray-600"
+                  "flex-1 flex items-center justify-center h-14 relative group transition-all duration-200 hover:bg-gray-200 rounded-xl",
+                  isActive ? "text-white" : "text-gray-400 hover:text-gray-600"
                 )}
                 onClick={() => router.push(item.href)}
               >
@@ -74,12 +74,12 @@ export function MobileNav() {
                   />
                   <span className={cn(
                     "text-xs font-medium mt-1",
-                    isActive ? "text-black" : "text-gray-500"
+                    isActive ? "text-white" : "text-gray-500"
                   )}>
                     {item.label}
                   </span>
                   {isActive && (
-                    <span className="absolute -bottom-1 h-0.5 w-6 bg-black rounded-full transition-all duration-200" />
+                    <span className="absolute -bottom-1 h-0.5 w-6 bg-white rounded-full transition-all duration-200" />
                   )}
                 </div>
               </Button>
