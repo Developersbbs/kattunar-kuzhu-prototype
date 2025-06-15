@@ -259,7 +259,12 @@ export default function MeetingsPage() {
     <main className="min-h-screen bg-gray-50 pb-28">
       {/* Header */}
       <div className="bg-white px-5 pt-16 pb-4 border-b flex items-center justify-between gap-2 fixed top-0 left-0 right-0 z-10">
-        <IoMdArrowBack />
+        <button
+          onClick={() => router.back()}
+          className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <IoMdArrowBack className="w-6 h-6" />
+        </button>
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Meetings</h1>
         </div>
@@ -341,7 +346,7 @@ export default function MeetingsPage() {
                             <Users className="w-4 h-4" />
                             <span>
                               {meeting.totalAttendees ||
-                                meeting.attendees.length}{" "}
+                                (meeting.attendees?.length || 0)}{" "}
                               Attendees
                             </span>
                           </div>
