@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 import {
   Bell,
@@ -281,7 +282,7 @@ export default function Dashboard() {
       {/* Profile Header */}
       <div className="bg-white px-5 pt-16 pb-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/profile/business" className="flex items-center gap-3">
             {/* Profile Image and Greeting */}
             <div className="relative">
               <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
@@ -297,14 +298,14 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Greeting and Business */}
+            {/* Greeting and Phone */}
             <div>
               <h1 className="text-base font-medium text-gray-900">
                 Good Morning, {user.name}
               </h1>
               <p className="text-sm text-gray-500 mt-0.5">{user.business}</p>
             </div>
-          </div>
+          </Link>
 
           {/* Notification Icon */}
           <Button

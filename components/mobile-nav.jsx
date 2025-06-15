@@ -60,8 +60,8 @@ export function MobileNav() {
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "flex-1 flex items-center justify-center h-14 relative group transition-all duration-200 hover:bg-gray-200 rounded-xl",
-                  isActive ? "text-white" : "text-gray-400 hover:text-gray-600"
+                  "flex-1 flex items-center justify-center h-14 relative group transition-all duration-200 rounded-xl",
+                  isActive ? "text-white" : "text-gray-400"
                 )}
                 onClick={() => router.push(item.href)}
               >
@@ -69,7 +69,7 @@ export function MobileNav() {
                   <Icon 
                     className={cn(
                       "w-6 h-6 transition-transform duration-200",
-                      !isActive && "group-hover:scale-110"
+                      !isActive && ""
                     )} 
                   />
                   <span className={cn(
