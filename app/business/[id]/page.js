@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { MobileNav } from "@/components/mobile-nav";
 import {
   ArrowLeft,
   Share2,
@@ -779,6 +780,9 @@ export default function BusinessProfilePage({ params }) {
           </Card>
         </div>
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileNav />
     </main>
   );
 }
