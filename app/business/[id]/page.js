@@ -24,8 +24,6 @@ import {
   Tag,
   Building2,
   Users,
-  FileText,
-  Hash,
   Star,
   Trophy,
   CheckCircle,
