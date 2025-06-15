@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FiArrowUpRight } from "react-icons/fi";
-import { FiArrowDownLeft } from "react-icons/fi";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 import {
   Bell,
@@ -43,11 +43,154 @@ const monthlyPosts = [
   { month: "Jun", posts: 52 },
 ];
 
+// Sample notifications data
+const sampleNotifications = [
+  {
+    id: 1,
+    type: "meeting",
+    title: "New Meeting Request",
+    message: "John invited you to a meeting tomorrow at 2 PM",
+    time: "5 minutes ago",
+    isRead: false,
+  },
+  {
+    id: 2,
+    type: "referral",
+    title: "Referral Accepted",
+    message: "Sarah accepted your referral for web development project",
+    time: "1 hour ago",
+    isRead: false,
+  },
+  {
+    id: 3,
+    type: "requirement",
+    title: "New Requirement Match",
+    message: "New office space requirement matches your profile",
+    time: "2 hours ago",
+    isRead: true,
+  },
+  {
+    id: 4,
+    type: "meeting",
+    title: "Meeting Reminder",
+    message: "Weekly business network meeting in 30 minutes",
+    time: "30 minutes ago",
+    isRead: false,
+  },
+  {
+    id: 5,
+    type: "referral",
+    title: "New Referral",
+    message: "Mike sent you a new business referral",
+    time: "1 day ago",
+    isRead: true,
+  },
+];
+
+// Notification Icon Component
+const NotificationIcon = ({ type }) => {
+  const icons = {
+    meeting: <CalendarDays className="w-4 h-4" />,
+    referral: <Handshake className="w-4 h-4" />,
+    requirement: <MessageSquarePlus className="w-4 h-4" />,
+  };
+
+  return (
+    <div className="p-2 bg-gray-100 rounded-full">
+      {icons[type] || <Bell className="w-4 h-4" />}
+    </div>
+  );
+};
+
+// Notification Panel Component
+const NotificationPanel = ({ isOpen, onClose }) => {
+  return (
+    <div
+      className={cn(
+        "fixed inset-y-0 right-0 w-full sm:w-[380px] bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50",
+        isOpen ? "translate-x-0" : "translate-x-full"
+      )}
+    >
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="px-4 py-6 border-b">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold">Notifications</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={onClose}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs hover:bg-gray-100"
+            >
+              Mark all as read
+            </Button>
+            <Separator orientation="vertical" className="h-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs hover:bg-gray-100"
+            >
+              Clear all
+            </Button>
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <ScrollArea className="flex-1 px-4">
+          <div className="space-y-1 py-4">
+            {sampleNotifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={cn(
+                  "p-4 rounded-lg transition-colors",
+                  notification.isRead ? "bg-white" : "bg-gray-50"
+                )}
+              >
+                <div className="flex gap-3">
+                  <NotificationIcon type={notification.type} />
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h3 className="text-sm font-medium">
+                          {notification.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {notification.message}
+                        </p>
+                      </div>
+                      {!notification.isRead && (
+                        <div className="h-2 w-2 rounded-full bg-black flex-shrink-0 mt-2" />
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-500 mt-2 block">
+                      {notification.time}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMeetingAlert, setShowMeetingAlert] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [showOverlay, setShowOverlay] = useState(false);
   const alertRef = useRef(null);
   const touchStartY = useRef(0);
 
@@ -122,6 +265,17 @@ export default function Dashboard() {
     },
   ];
 
+  // Handle notification panel
+  const handleNotificationToggle = () => {
+    setShowNotifications(!showNotifications);
+    setShowOverlay(!showOverlay);
+  };
+
+  const handleClose = () => {
+    setShowNotifications(false);
+    setShowOverlay(false);
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 pb-28">
       {/* Profile Header */}
@@ -143,7 +297,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Greeting and Phone */}
+            {/* Greeting and Business */}
             <div>
               <h1 className="text-base font-medium text-gray-900">
                 Good Morning, {user.name}
@@ -157,7 +311,7 @@ export default function Dashboard() {
             variant="ghost"
             size="icon"
             className="h-10 w-10 rounded-full hover:bg-gray-100"
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={handleNotificationToggle}
           >
             <div className="relative">
               <Bell className="h-5 w-5 text-gray-600" />
@@ -251,7 +405,7 @@ export default function Dashboard() {
       )}
 
       {/* Statistics Scroll Section */}
-      <div className="px-5 overflow-hidden">
+      <div className="px-5 pt-2 overflow-hidden">
         <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide -mx-1 px-1">
           {/* Referrals Card */}
           <Card className="flex-shrink-0 w-[280px] p-4 bg-white">
@@ -346,7 +500,7 @@ export default function Dashboard() {
       </div>
 
       {/* Requirements Posts Chart and Quick Actions Grid */}
-      <div className="px-5 py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="px-5 grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Requirements Posts Chart */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-6">
@@ -557,6 +711,19 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
+
+      {/* Notification Panel (conditionally rendered) */}
+      {showNotifications && (
+        <NotificationPanel isOpen={showNotifications} onClose={handleClose} />
+      )}
+
+      {/* Overlay */}
+      {showOverlay && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+          onClick={handleClose}
+        />
+      )}
 
       {/* Mobile Navigation */}
       <MobileNav />
