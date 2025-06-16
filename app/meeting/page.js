@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IoMdArrowBack } from "react-icons/io";
 import { BsThreeDotsVertical } from "react-icons/bs";
-
+import dynamic from 'next/dynamic';
+import L from 'leaflet';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,43 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { MobileNav } from "@/components/mobile-nav";
+
+// Dynamically import map components to avoid SSR issues
+const MapContainer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Circle = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Circle),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+);
+
+// Custom marker icon setup
+const createIcon = (iconUrl) => {
+  return new L.Icon({
+    iconUrl,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+};
+
+// Default marker icon setup
+const defaultIcon = createIcon('https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png');
+L.Marker.prototype.options.icon = defaultIcon;
 
 // Mock data for meetings
 const meetings = [
@@ -86,6 +124,13 @@ const meetings = [
   // Add more mock meetings as needed
 ];
 
+// Mock meeting location (replace with actual meeting location)
+const meetingLocation = {
+  latitude: 13.0827,  // Chennai coordinates
+  longitude: 80.2707,
+  radius: 100  // 100 meters radius
+};
+
 export default function MeetingsPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
@@ -101,50 +146,163 @@ export default function MeetingsPage() {
   };
 
   // Attendance marking dialog
-  const AttendanceDialog = () => (
-    <Dialog open={showAttendanceDialog} onOpenChange={setShowAttendanceDialog}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Mark Attendance</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between flex-col">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span>{format(new Date(), "h:mm a, MMMM d, yyyy")}</span>
+  const AttendanceDialog = () => {
+    const [location, setLocation] = useState(null);
+    const [locationError, setLocationError] = useState(null);
+    const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [isWithinRadius, setIsWithinRadius] = useState(false);
+
+    const getDistanceFromLatLonInMeters = useCallback((lat1, lon1, lat2, lon2) => {
+      const R = 6371e3; // Earth's radius in meters
+      const φ1 = lat1 * Math.PI/180;
+      const φ2 = lat2 * Math.PI/180;
+      const Δφ = (lat2-lat1) * Math.PI/180;
+      const Δλ = (lon2-lon1) * Math.PI/180;
+
+      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+      return R * c;
+    }, []);
+
+    const getCurrentLocation = useCallback(() => {
+      setIsLoadingLocation(true);
+      setLocationError(null);
+
+      if (!navigator.geolocation) {
+        setLocationError("Geolocation is not supported by your browser");
+        setIsLoadingLocation(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newLocation = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          };
+          setLocation(newLocation);
+          
+          const distance = getDistanceFromLatLonInMeters(
+            newLocation.latitude,
+            newLocation.longitude,
+            meetingLocation.latitude,
+            meetingLocation.longitude
+          );
+          
+          setIsWithinRadius(distance <= meetingLocation.radius);
+          setIsLoadingLocation(false);
+        },
+        (error) => {
+          setLocationError("Unable to get your location. Please enable location access.");
+          setIsLoadingLocation(false);
+        },
+        { enableHighAccuracy: true }
+      );
+    }, [getDistanceFromLatLonInMeters]);
+
+    useEffect(() => {
+      getCurrentLocation();
+    }, [getCurrentLocation]);
+
+    return (
+      <Dialog open={showAttendanceDialog} onOpenChange={setShowAttendanceDialog}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Mark Attendance</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Time and Date Section */}
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="w-4 h-4" />
+                  <span>{format(new Date(), "h:mm a")}</span>
+                </div>
+                <span className="text-sm text-gray-600">
+                  {format(new Date(), "MMMM d, yyyy")}
+                </span>
               </div>
-              <Button
-                size="sm"
-                className="h-8"
-                disabled={isMarkingAttendance}
-                onClick={() => {
-                  setIsMarkingAttendance(true);
-                  // Simulate marking attendance
-                  setTimeout(() => {
-                    setIsMarkingAttendance(false);
-                    setShowAttendanceDialog(false);
-                  }, 1500);
-                }}
-              >
-                {isMarkingAttendance ? (
-                  <span className="flex items-center gap-2">
-                    Marking... <Clock className="w-4 h-4 animate-spin" />
-                  </span>
-                ) : (
-                  "Confirm Attedance"
+            </div>
+
+            {/* Map Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin className="w-4 h-4" />
+                  <span>Location Verification</span>
+                </div>
+                {locationError && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={getCurrentLocation}
+                    disabled={isLoadingLocation}
+                  >
+                    Retry
+                  </Button>
                 )}
-              </Button>
+              </div>
+
+              {location && (
+                <div className="h-[200px] rounded-lg overflow-hidden border">
+                  <MapContainer
+                    center={[meetingLocation.latitude, meetingLocation.longitude]}
+                    zoom={15}
+                    style={{ height: "100%", width: "100%" }}
+                    zoomControl={false}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[meetingLocation.latitude, meetingLocation.longitude]}>
+                      <Popup>Meeting Location</Popup>
+                    </Marker>
+                    <Circle
+                      center={[meetingLocation.latitude, meetingLocation.longitude]}
+                      radius={meetingLocation.radius}
+                      pathOptions={{ 
+                        color: isWithinRadius ? 'green' : 'red',
+                        fillColor: isWithinRadius ? 'green' : 'red',
+                        fillOpacity: 0.2
+                      }}
+                    />
+                    <Marker position={[location.latitude, location.longitude]}>
+                      <Popup>You are here</Popup>
+                    </Marker>
+                  </MapContainer>
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <MapPin className="w-4 h-4" />
-              <span>Current Location</span>
-            </div>
+
+            <Button
+              className="w-full bg-black hover:bg-gray-800"
+              disabled={isMarkingAttendance || !location || locationError || !isWithinRadius}
+              onClick={() => {
+                setIsMarkingAttendance(true);
+                setTimeout(() => {
+                  setIsMarkingAttendance(false);
+                  setShowAttendanceDialog(false);
+                }, 1500);
+              }}
+            >
+              {isMarkingAttendance ? (
+                <span className="flex items-center gap-2">
+                  Marking... <Clock className="w-4 h-4 animate-spin" />
+                </span>
+              ) : (
+                "Mark Attendance"
+              )}
+            </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   // Meeting Card Components
   const MeetingCard = ({ meeting, onAttendanceClick }) => {

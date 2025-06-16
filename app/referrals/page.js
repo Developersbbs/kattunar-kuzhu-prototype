@@ -39,6 +39,16 @@ import {
   Award,
   ArrowLeft,
 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Mock data for referrals
 const mockGivenReferrals = [
@@ -58,15 +68,6 @@ const mockGivenReferrals = [
         role: "CEO",
         rating: 4.8,
         referralCount: 24,
-      },
-      {
-        id: 2,
-        name: "Sarah Wilson",
-        company: "Digital Labs",
-        avatar: "/path-to-avatar.jpg",
-        role: "CTO",
-        rating: 4.5,
-        referralCount: 18,
       },
     ],
     updates: 2,
@@ -169,6 +170,35 @@ const analytics = {
   monthlyTrend: [65, 72, 84, 78, 82, 95],
 };
 
+// Mock member data for search
+const mockMembers = [
+  {
+    id: 1,
+    name: "John Doe",
+    company: "Tech Solutions",
+    role: "CEO",
+    group: "Group 1",
+    avatar: "",
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    company: "Digital Marketing Pro",
+    role: "Marketing Director",
+    group: "Group 2",
+    avatar: "",
+  },
+  {
+    id: 3,
+    name: "Mike Johnson",
+    company: "Creative Marketing",
+    role: "Marketing Director",
+    group: "Group 1",
+    avatar: "",
+  },
+  // Add more mock members as needed
+];
+
 export default function ReferralsPage() {
   const router = useRouter();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -177,6 +207,30 @@ export default function ReferralsPage() {
   const [showDetail, setShowDetail] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("given");
+  const [referralType, setReferralType] = useState("member");
+  const [memberSearch, setMemberSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // Add status filter state
+  const [newReferral, setNewReferral] = useState({
+    type: "member",
+    memberDetails: null,
+    contactName: "",
+    companyName: "",
+    phoneNumber: "",
+    email: "",
+    requirement: "",
+    budget: "",
+    timeline: "",
+    priority: "normal",
+    notes: "",
+    attachments: [],
+  });
+
+  // Filter referrals based on status
+  const filteredGivenReferrals = mockGivenReferrals.filter((referral) => {
+    if (statusFilter === "all") return true;
+    return referral.status === statusFilter;
+  });
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -249,55 +303,112 @@ export default function ReferralsPage() {
     </Card>
   );
 
+  const handleCreateReferral = (e) => {
+    e.preventDefault();
+    if (referralType === "member" && !selectedMember) {
+      return;
+    }
+
+    // Create referral based on form data
+    console.log("Creating referral:", newReferral);
+
+    // Reset form and close dialog
+    setNewReferral({
+      type: "member",
+      memberDetails: null,
+      contactName: "",
+      companyName: "",
+      phoneNumber: "",
+      email: "",
+      requirement: "",
+      budget: "",
+      timeline: "",
+      priority: "normal",
+      notes: "",
+      attachments: [],
+    });
+    setSelectedMember(null);
+    setMemberSearch("");
+    setReferralType("member");
+    setShowCreateDialog(false);
+  };
+
+  const filteredMembers = mockMembers.filter(
+    (member) =>
+      member.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+      member.company.toLowerCase().includes(memberSearch.toLowerCase()) ||
+      member.group.toLowerCase().includes(memberSearch.toLowerCase())
+  );
+
   const CreateReferralDialog = () => (
     <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-auto">
         <DialogHeader>
           <DialogTitle>Create New Referral</DialogTitle>
           <DialogDescription>
-            Create a referral to connect a member with a business opportunity.
+            Create a referral to connect a member with a business opportunity
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="requirement">Requirement *</Label>
-            <Textarea
-              id="requirement"
-              placeholder="Describe the business opportunity or requirement"
-              className="h-24 resize-none"
-            />
+        <div className="space-y-6 py-4">
+          {/* Referral Type Selection */}
+          <div className="space-y-3">
+            <Label>Referral Type</Label>
+            <RadioGroup
+              defaultValue="member"
+              value={referralType}
+              onValueChange={(value) => {
+                setReferralType(value);
+                // Reset the form when switching types
+                setSelectedMember(null);
+                setMemberSearch("");
+                setNewReferral({
+                  type: value,
+                  memberDetails: null,
+                  contactName: "",
+                  companyName: "",
+                  phoneNumber: "",
+                  email: "",
+                  requirement: "",
+                  budget: "",
+                  timeline: "",
+                  priority: "normal",
+                  notes: "",
+                  attachments: [],
+                });
+              }}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="member" id="member" />
+                <Label htmlFor="member">Member Referral</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="manual" id="manual" />
+                <Label htmlFor="manual">Manual Entry</Label>
+              </div>
+            </RadioGroup>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="budget">Budget Range *</Label>
-            <Input
-              id="budget"
-              placeholder="e.g., ₹5,00,000 - ₹10,00,000"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="preferences">Additional Details</Label>
-            <Input
-              id="preferences"
-              placeholder="Any specific requirements or preferences?"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="member-search">Select Member *</Label>
+
+          {referralType === "member" ? (
+            /* Member Search Section */
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="member-search"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search for a member..."
-                    className="pl-9"
-                  />
+              <div className="space-y-2">
+                <Label htmlFor="member-search">Select Member *</Label>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      id="member-search"
+                      value={memberSearch}
+                      onChange={(e) => setMemberSearch(e.target.value)}
+                      placeholder="Search by name, company, or group..."
+                      className="pl-9"
+                    />
+                  </div>
+                  <Button variant="outline" size="icon" className="shrink-0">
+                    <Filter className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button variant="outline" size="icon" className="shrink-0">
-                  <Filter className="h-4 w-4" />
-                </Button>
               </div>
 
               {/* Selected Member Card */}
@@ -313,7 +424,7 @@ export default function ReferralsPage() {
                       <div>
                         <div className="font-medium">{selectedMember.name}</div>
                         <div className="text-sm text-gray-500">
-                          {selectedMember.company}
+                          {selectedMember.company} • {selectedMember.group}
                         </div>
                       </div>
                     </div>
@@ -342,33 +453,184 @@ export default function ReferralsPage() {
                   </div>
                 )}
               </Card>
+
+              {/* Member Search Results */}
+              {memberSearch && (
+                <Card className="max-h-60 overflow-auto">
+                  <div className="p-2">
+                    {filteredMembers.length > 0 ? (
+                      filteredMembers.map((member) => (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedMember(member);
+                            setNewReferral((prev) => ({
+                              ...prev,
+                              memberDetails: member,
+                              contactName: member.name,
+                              companyName: member.company,
+                            }));
+                            setMemberSearch("");
+                          }}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-50 rounded-md"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-sm font-medium">
+                                {member.name[0]}
+                              </span>
+                            </div>
+                            <div>
+                              <div className="font-medium">{member.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {member.company} • {member.group}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-3 text-center text-sm text-gray-500">
+                        No members found
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              )}
+            </div>
+          ) : (
+            /* Manual Entry Fields */
+            <div className="grid gap-4">
+              <div>
+                <Label>Contact Name *</Label>
+                <Input
+                  className="mt-1.5"
+                  placeholder="Enter contact name"
+                  value={newReferral.contactName}
+                  onChange={(e) =>
+                    setNewReferral((prev) => ({
+                      ...prev,
+                      contactName: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <Label>Company Name *</Label>
+                <Input
+                  className="mt-1.5"
+                  placeholder="Enter company name"
+                  value={newReferral.companyName}
+                  onChange={(e) =>
+                    setNewReferral((prev) => ({
+                      ...prev,
+                      companyName: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <Label>Phone Number *</Label>
+                <Input
+                  className="mt-1.5"
+                  placeholder="Enter phone number"
+                  type="tel"
+                  value={newReferral.phoneNumber}
+                  onChange={(e) =>
+                    setNewReferral((prev) => ({
+                      ...prev,
+                      phoneNumber: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <Label>Email (Optional)</Label>
+                <Input
+                  className="mt-1.5"
+                  placeholder="Enter email address"
+                  type="email"
+                  value={newReferral.email}
+                  onChange={(e) =>
+                    setNewReferral((prev) => ({
+                      ...prev,
+                      email: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Common Fields */}
+          <div className="space-y-4">
+            <div>
+              <Label>Requirement *</Label>
+              <Textarea
+                className="mt-1.5 resize-none h-24"
+                placeholder="Describe the business requirement or opportunity"
+                value={newReferral.requirement}
+                onChange={(e) =>
+                  setNewReferral((prev) => ({
+                    ...prev,
+                    requirement: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Notes (Optional)</Label>
+              <Textarea
+                className="mt-1.5"
+                placeholder="Add any additional details or requirements..."
+                value={newReferral.notes}
+                onChange={(e) =>
+                  setNewReferral((prev) => ({
+                    ...prev,
+                    notes: e.target.value,
+                  }))
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Attachments (Optional)</Label>
+              <div className="mt-1.5 flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm">
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Add Files
+                </Button>
+                <p className="text-sm text-gray-500">No files attached</p>
+              </div>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="message">Message to Member</Label>
-            <Textarea
-              id="message"
-              placeholder="Add a personal note about this referral..."
-              className="h-20 resize-none"
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+
+          <div className="flex gap-3 justify-end">
             <Button
+              type="button"
               variant="outline"
-              className="w-full"
               onClick={() => setShowCreateDialog(false)}
             >
               Cancel
             </Button>
             <Button
-              className="w-full bg-gray-900"
-              onClick={() => {
-                setShowCreateDialog(false);
-                setShowConfirmDialog(true);
-              }}
-              disabled={!selectedMember}
+              onClick={handleCreateReferral}
+              disabled={
+                !newReferral.requirement ||
+                !newReferral.budget ||
+                !newReferral.timeline ||
+                (referralType === "member" && !selectedMember) ||
+                (referralType === "manual" &&
+                  (!newReferral.contactName ||
+                    !newReferral.companyName ||
+                    !newReferral.phoneNumber))
+              }
             >
-              Preview & Send
+              Create Referral
             </Button>
           </div>
         </div>
@@ -390,25 +652,32 @@ export default function ReferralsPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium">{selectedMember.name[0]}</span>
+                  <span className="text-sm font-medium">
+                    {selectedMember.name[0]}
+                  </span>
                 </div>
                 <div>
                   <div className="font-medium">{selectedMember.name}</div>
-                  <div className="text-sm text-gray-500">{selectedMember.company}</div>
+                  <div className="text-sm text-gray-500">
+                    {selectedMember.company}
+                  </div>
                 </div>
               </div>
               <Separator />
               <div className="text-sm space-y-2">
-                <p className="font-medium">Are you sure you want to send this referral?</p>
+                <p className="font-medium">
+                  Are you sure you want to send this referral?
+                </p>
                 <p className="text-gray-500">
-                  The member will be notified and can choose to accept or decline the referral.
+                  The member will be notified and can choose to accept or
+                  decline the referral.
                 </p>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setShowConfirmDialog(false)}
               >
                 Back to Edit
@@ -554,10 +823,7 @@ export default function ReferralsPage() {
           <div className="flex items-center gap-2 sticky top-0 py-4 bg-gray-50">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search given referrals..."
-                className="pl-9"
-              />
+              <Input placeholder="Search given referrals..." className="pl-9" />
             </div>
             <Button variant="outline" size="icon">
               <Filter className="h-4 w-4" />
@@ -567,27 +833,82 @@ export default function ReferralsPage() {
           {/* Status Overview */}
           <div className="grid grid-cols-3 gap-4">
             <Card className="p-4">
-              <div className="text-2xl font-semibold">{mockGivenReferrals.length}</div>
+              <div className="text-2xl font-semibold">
+                {mockGivenReferrals.length}
+              </div>
               <div className="text-sm text-gray-500">Total Given</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-semibold">
-                {mockGivenReferrals.filter(r => r.status === "converted").length}
+                {
+                  mockGivenReferrals.filter((r) => r.status === "converted")
+                    .length
+                }
               </div>
               <div className="text-sm text-gray-500">Converted</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-semibold">
-                {mockGivenReferrals.filter(r => r.status === "pending").length}
+                {
+                  mockGivenReferrals.filter((r) => r.status === "pending")
+                    .length
+                }
               </div>
               <div className="text-sm text-gray-500">Pending</div>
             </Card>
           </div>
 
+          {/* Status Filter */}
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Status Filter</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setStatusFilter("all")}
+                className="text-gray-500"
+              >
+                Reset
+              </Button>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <Button
+                variant={
+                  statusFilter === "all" ? "solid" : "outline"
+                }
+                onClick={() => setStatusFilter("all")}
+                className="flex-1"
+              >
+                Converted
+              </Button>
+              <Button
+                variant={
+                  statusFilter === "pending" ? "solid" : "outline"
+                }
+                onClick={() => setStatusFilter("pending")}
+                className="flex-1"
+              >
+                Pending
+              </Button>
+              <Button
+                variant={
+                  statusFilter === "converted" ? "solid" : "outline"
+                }
+                onClick={() => setStatusFilter("converted")}
+                className="flex-1"
+              >
+                Failed
+              </Button>
+            </div>
+          </div>
+
           {/* Given Referrals List */}
           <div className="space-y-4">
-            {mockGivenReferrals.map((referral) => (
-              <Card key={referral.id} className="p-4 hover:border-gray-400 transition-colors">
+            {filteredGivenReferrals.map((referral) => (
+              <Card
+                key={referral.id}
+                className="p-4 hover:border-gray-400 transition-colors"
+              >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
@@ -605,36 +926,56 @@ export default function ReferralsPage() {
                         <span>{referral.timeline}</span>
                       </div>
                     </div>
-                    <div className={`px-2 py-1 rounded-full text-xs ${
-                      referral.status === "converted" 
-                        ? "bg-gray-800 text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}>
-                      {referral.status.charAt(0).toUpperCase() + referral.status.slice(1)}
+                    <div
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        referral.status === "converted"
+                          ? "bg-gray-800 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {referral.status.charAt(0).toUpperCase() +
+                        referral.status.slice(1)}
                     </div>
                   </div>
 
                   {/* Given To Section */}
                   <div>
-                    <div className="text-xs font-medium text-gray-500 mb-2">Given To</div>
+                    <div className="text-xs font-medium text-gray-500 mb-2">
+                      Given To
+                    </div>
                     <div className="space-y-2">
                       {referral.givenTo.map((member) => (
-                        <div key={member.id} className="flex items-center justify-between">
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between"
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                              <span className="text-xs font-medium">{member.name[0]}</span>
+                              <span className="text-xs font-medium">
+                                {member.name[0]}
+                              </span>
                             </div>
                             <div>
-                              <div className="text-sm font-medium">{member.name}</div>
-                              <div className="text-xs text-gray-500">{member.company}</div>
+                              <div className="text-sm font-medium">
+                                {member.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {member.company}
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1">
                               <Award className="w-3.5 h-3.5 text-gray-400" />
-                              <span className="text-xs text-gray-500">{member.rating}</span>
+                              <span className="text-xs text-gray-500">
+                                {member.rating}
+                              </span>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                            >
                               <MessageSquare className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -648,9 +989,13 @@ export default function ReferralsPage() {
                     <div className="pt-3 mt-3 border-t">
                       <div className="flex items-center gap-2 text-sm">
                         <ThumbsUp className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium">Deal Closed: {referral.outcome.dealValue}</span>
+                        <span className="font-medium">
+                          Deal Closed: {referral.outcome.dealValue}
+                        </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{referral.outcome.feedback}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {referral.outcome.feedback}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -678,18 +1023,26 @@ export default function ReferralsPage() {
           {/* Status Overview */}
           <div className="grid grid-cols-3 gap-4">
             <Card className="p-4">
-              <div className="text-2xl font-semibold">{mockTakenReferrals.length}</div>
+              <div className="text-2xl font-semibold">
+                {mockTakenReferrals.length}
+              </div>
               <div className="text-sm text-gray-500">Total Received</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-semibold">
-                {mockTakenReferrals.filter(r => r.status === "converted").length}
+                {
+                  mockTakenReferrals.filter((r) => r.status === "converted")
+                    .length
+                }
               </div>
               <div className="text-sm text-gray-500">Converted</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-semibold">
-                {mockTakenReferrals.filter(r => r.status === "pending").length}
+                {
+                  mockTakenReferrals.filter((r) => r.status === "pending")
+                    .length
+                }
               </div>
               <div className="text-sm text-gray-500">Pending</div>
             </Card>
@@ -698,7 +1051,10 @@ export default function ReferralsPage() {
           {/* Taken Referrals List */}
           <div className="space-y-4">
             {mockTakenReferrals.map((referral) => (
-              <Card key={referral.id} className="p-4 hover:border-gray-400 transition-colors">
+              <Card
+                key={referral.id}
+                className="p-4 hover:border-gray-400 transition-colors"
+              >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
                     <div>
@@ -716,45 +1072,62 @@ export default function ReferralsPage() {
                         <span>{referral.timeline}</span>
                       </div>
                     </div>
-                    <div className={`px-2 py-1 rounded-full text-xs ${
-                      referral.status === "converted" 
-                        ? "bg-gray-800 text-white"
-                        : "bg-gray-100 text-gray-600"
-                    }`}>
-                      {referral.status.charAt(0).toUpperCase() + referral.status.slice(1)}
+                    <div
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        referral.status === "converted"
+                          ? "bg-gray-800 text-white"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {referral.status.charAt(0).toUpperCase() +
+                        referral.status.slice(1)}
                     </div>
                   </div>
 
                   {/* Referral Source */}
                   <div>
-                    <div className="text-xs font-medium text-gray-500 mb-2">Received From</div>
+                    <div className="text-xs font-medium text-gray-500 mb-2">
+                      Received From
+                    </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-medium">{referral.givenBy.name[0]}</span>
+                          <span className="text-xs font-medium">
+                            {referral.givenBy.name[0]}
+                          </span>
                         </div>
                         <div>
-                          <div className="text-sm font-medium">{referral.givenBy.name}</div>
-                          <div className="text-xs text-gray-500">{referral.givenBy.company}</div>
+                          <div className="text-sm font-medium">
+                            {referral.givenBy.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {referral.givenBy.company}
+                          </div>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" className="h-8">
                         <MessageSquare className="w-3.5 h-3.5 mr-1.5" />
-                        Message
+                        Add Thank note
                       </Button>
                     </div>
                   </div>
 
                   {/* Client Info */}
                   <div className="pt-3 border-t">
-                    <div className="text-xs font-medium text-gray-500 mb-2">Client Details</div>
+                    <div className="text-xs font-medium text-gray-500 mb-2">
+                      Client Details
+                    </div>
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                         <Building2 className="w-4 h-4 text-gray-500" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium">{referral.client.name}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{referral.client.requirement}</div>
+                        <div className="text-sm font-medium">
+                          {referral.client.name}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          {referral.client.requirement}
+                        </div>
                         <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600 mt-1.5">
                           {referral.client.industry}
                         </div>
@@ -767,9 +1140,13 @@ export default function ReferralsPage() {
                     <div className="pt-3 mt-3 border-t">
                       <div className="flex items-center gap-2 text-sm">
                         <ThumbsUp className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium">Deal Closed: {referral.outcome.dealValue}</span>
+                        <span className="font-medium">
+                          Deal Closed: {referral.outcome.dealValue}
+                        </span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{referral.outcome.testimonial}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {referral.outcome.testimonial}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -777,7 +1154,6 @@ export default function ReferralsPage() {
             ))}
           </div>
         </TabsContent>
-
       </Tabs>
 
       {/* Dialogs */}
