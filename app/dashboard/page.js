@@ -21,6 +21,16 @@ import {
   X,
   Activity,
   Plus,
+  UserPlus,
+  Megaphone,
+  Settings,
+  ShieldCheck,
+  Building2,
+  UserCog,
+  FileText,
+  ArrowRightLeft,
+  CheckSquare,
+  BarChart3,
 } from "lucide-react";
 import { FaUser } from "react-icons/fa";
 import Image from "next/image";
@@ -33,6 +43,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useRouter } from "next/navigation";
 
 // Mock data for the line chart
 const monthlyPosts = [
@@ -186,12 +197,166 @@ const NotificationPanel = ({ isOpen, onClose }) => {
   );
 };
 
+// Action groups configuration for different user roles
+const actionGroups = {
+  SUPER_ADMIN: [
+    {
+      label: "Group Management",
+      icon: <Users className="w-5 h-5" />,
+      items: [
+        {
+          label: 'Manage Groups',
+          icon: <Settings className="w-4 h-4" />,
+          path: '/admin/groups',  // Links to our new groups management page
+        },
+        {
+          label: "Invite Member",
+          icon: <UserPlus className="w-4 h-4" />,
+          path: "/admin/members/new",
+        },
+      ],
+    },
+    {
+      label: "Analytics",
+      icon: <BarChart3 className="w-5 h-5" />,
+      items: [
+        {
+          label: "Referral Analytics",
+          icon: <ArrowRightLeft className="w-4 h-4" />,
+          path: "/admin/analytics/referrals",
+        },
+        {
+          label: "Requirements Overview",
+          icon: <FileText className="w-4 h-4" />,
+          path: "/admin/analytics/requirements",
+        },
+        {
+          label: "Meeting Statistics",
+          icon: <CalendarDays className="w-4 h-4" />,
+          path: "/admin/analytics/meetings",
+        },
+      ],
+    },
+    {
+      label: "Communications",
+      icon: <Megaphone className="w-5 h-5" />,
+      items: [
+        {
+          label: "Send Announcement",
+          icon: <Bell className="w-4 h-4" />,
+          path: "/admin/communications/announce",
+        },
+        {
+          label: "Broadcast Message",
+          icon: <MessageSquarePlus className="w-4 h-4" />,
+          path: "/admin/communications/broadcast",
+        },
+      ],
+    },
+  ],
+  ADMIN: [
+    // Admin specific actions can be added here
+  ],
+  GROUP_HEAD: [
+    // Group head specific actions can be added here
+  ],
+  MEMBER: [
+    // Member specific actions can be added here
+  ],
+};
+
+// Enhanced SpeedDial Component with nested menus
+const SpeedDial = ({ isOpen, onClose, role }) => {
+  const router = useRouter();
+  const [activeGroup, setActiveGroup] = useState(null);
+
+  const handleGroupClick = (group) => {
+    setActiveGroup(activeGroup === group.label ? null : group.label);
+  };
+
+  const handleActionClick = (path) => {
+    router.push(path);
+    onClose();
+  };
+
+  const actions = actionGroups[role] || [];
+  console.log('SpeedDial Props:', { isOpen, role, actionsCount: actions.length });
+
+  // Early return if no actions for role
+  if (!actions.length) {
+    console.log('No actions found for role:', role);
+    return null;
+  }
+
+  return (
+    <>
+      <div
+        className={cn(
+          "fixed bottom-24 right-4 z-50 flex flex-col-reverse items-end gap-4",
+          !isOpen && "pointer-events-none"
+        )}
+      >
+        {/* Action Groups */}
+        {isOpen && (
+          <div className="flex flex-col gap-4 items-end">
+            {actions.map((group) => (
+              <div key={group.label} className="flex flex-col items-end gap-2">
+                {/* Group items */}
+                {activeGroup === group.label && (
+                  <div className="flex flex-col gap-2 items-end">
+                    {group.items.map((item) => (
+                      <button
+                        key={item.label}
+                        onClick={() => handleActionClick(item.path)}
+                        className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transform transition-all duration-200 hover:scale-105"
+                      >
+                        <span className="text-sm font-medium">{item.label}</span>
+                        {item.icon}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {/* Group button */}
+                <button
+                  onClick={() => handleGroupClick(group)}
+                  className={cn(
+                    "flex items-center gap-2 p-3 rounded-full shadow-lg transition-all duration-200",
+                    activeGroup === group.label
+                      ? "bg-black text-white"
+                      : "bg-white hover:bg-gray-50"
+                  )}
+                >
+                  {group.icon}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Main FAB Button */}
+        <button
+          onClick={() => onClose()}
+          className={cn(
+            "p-4 rounded-full shadow-lg transition-all duration-200 transform pointer-events-auto",
+            isOpen
+              ? "bg-gray-900 text-white rotate-45"
+              : "bg-black text-white hover:bg-gray-800"
+          )}
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </div>
+    </>
+  );
+};
+
 export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMeetingAlert, setShowMeetingAlert] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [isFabOpen, setIsFabOpen] = useState(false);
   const alertRef = useRef(null);
   const touchStartY = useRef(0);
 
@@ -276,6 +441,18 @@ export default function Dashboard() {
     setShowNotifications(false);
     setShowOverlay(false);
   };
+
+  // Close FAB when scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isFabOpen) {
+        setIsFabOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isFabOpen]);
 
   return (
     <main className="min-h-screen bg-gray-50 pb-28">
@@ -712,6 +889,13 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
+
+      {/* Speed Dial FAB */}
+      <SpeedDial
+        isOpen={isFabOpen}
+        onClose={() => setIsFabOpen(!isFabOpen)}
+        role={"SUPER_ADMIN"}
+      />
 
       {/* Notification Panel (conditionally rendered) */}
       {showNotifications && (
