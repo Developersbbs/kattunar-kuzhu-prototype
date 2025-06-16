@@ -247,9 +247,9 @@ const actionGroups = {
           path: "/admin/communications/announce",
         },
         {
-          label: "Broadcast Message",
+          label: "Send Message",
           icon: <MessageSquarePlus className="w-4 h-4" />,
-          path: "/admin/communications/broadcast",
+          path: "/admin/communications/messages",
         },
       ],
     },
