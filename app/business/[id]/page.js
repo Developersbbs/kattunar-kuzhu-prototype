@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MobileNav } from "@/components/mobile-nav";
+import { ServiceCard } from "@/components/ui/service-card";
+import { Badge } from "@/components/ui/badge";
+import { RequirementCard } from "@/components/ui/requirement-card";
 import {
   ArrowLeft,
   Share2,
@@ -154,23 +157,27 @@ const businessData = {
   services: [
     {
       name: "Custom Software Development",
-      description: "End-to-end software solutions tailored to your business needs",
-      icon: "code"
+      description: "End-to-end software solutions tailored to your business needs. We build scalable, secure, and maintainable applications using cutting-edge technologies.",
+      icon: "code",
+      features: ["Web Applications", "Mobile Apps", "API Development", "Custom CRM"]
     },
     {
       name: "Cloud Migration & DevOps",
-      description: "Seamless cloud migration and DevOps implementation",
-      icon: "cloud"
+      description: "Seamless cloud migration and DevOps implementation. Optimize your infrastructure and streamline deployment processes.",
+      icon: "cloud",
+      features: ["AWS/Azure Migration", "CI/CD Pipeline", "Container Orchestration", "Infrastructure as Code"]
     },
     {
       name: "Digital Transformation",
-      description: "Complete digital transformation consulting and implementation",
-      icon: "refresh-cw"
+      description: "Complete digital transformation consulting and implementation. Transform your business processes with modern digital solutions.",
+      icon: "refresh-cw",
+      features: ["Process Automation", "Digital Strategy", "Legacy Modernization", "Data Analytics"]
     },
     {
       name: "Enterprise Solutions",
-      description: "Scalable enterprise-grade software solutions",
-      icon: "building"
+      description: "Scalable enterprise-grade software solutions. Comprehensive systems that grow with your business needs.",
+      icon: "building",
+      features: ["ERP Systems", "Business Intelligence", "Workflow Automation", "Enterprise Integration"]
     }
   ],
   certifications: [
@@ -208,6 +215,50 @@ const businessData = {
 export default function BusinessProfilePage({ params }) {
   const router = useRouter();
   const [saved, setSaved] = useState(false);
+
+  const ServicesSection = ({ services }) => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold">Our Services</h2>
+          <Badge variant="outline" className="ml-2">
+            {services.length} Services
+          </Badge>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {services.map((service, index) => (
+            <ServiceCard key={index} service={service} />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const RequirementsSection = ({ requirements }) => {
+    const activeRequirements = requirements.filter(req => req.status === "Active");
+    
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-semibold">Active Requirements</h2>
+            <Badge variant="outline" className="ml-2">
+              {activeRequirements.length} Active
+            </Badge>
+          </div>
+          <Button variant="outline" className="text-sm">
+            View All Requirements
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {activeRequirements.map((requirement) => (
+            <RequirementCard key={requirement.id} requirement={requirement} />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -400,8 +451,16 @@ export default function BusinessProfilePage({ params }) {
                 <p className="text-sm text-gray-500 mt-1">Requirements</p>
               </div>
             </div>
-          </Card>        {/* Contact & Social */}
-        <div className="grid grid-cols-1 gap-6">
+          </Card>
+
+          {/* Services Section */}
+          <ServicesSection services={businessData.services} />
+          
+          {/* Requirements Section */}
+          <RequirementsSection requirements={businessData.requirements} />
+
+          {/* Stats and Testimonials */}
+          <div className="grid grid-cols-1 gap-6">
             {/* Contact Info */}
             <Card className="p-6">
               <h3 className="text-sm font-medium text-gray-500 mb-4">Contact Information</h3>
@@ -694,65 +753,7 @@ export default function BusinessProfilePage({ params }) {
                 <ArrowLeft className="w-4 h-4 ml-1.5 rotate-180" />
               </Button>
             </div>
-          </Card>        {/* Services & Certifications */}
-        <div className="grid grid-cols-1 gap-6">
-            {/* Services */}
-            <Card className="p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-4">Services</h3>
-              <div className="space-y-4">
-                {businessData.services.map((service, index) => {
-                  const Icon = {
-                    code: Code,
-                    cloud: Cloud,
-                    "refresh-cw": RefreshCw,
-                    building: Building2
-                  }[service.icon] || Building2;
-
-                  return (
-                    <div key={index} className="group">
-                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <Icon className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm group-hover:text-gray-900">{service.name}</h4>
-                          <p className="text-sm text-gray-500 mt-1">{service.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-
-            {/* Certifications */}
-            <Card className="p-6">
-              <h3 className="text-sm font-medium text-gray-500 mb-4">Certifications</h3>
-              <div className="space-y-4">
-                {businessData.certifications.map((cert, index) => {
-                  const Icon = {
-                    "check-circle": CheckCircle,
-                    award: Award
-                  }[cert.icon] || Award;
-
-                  return (
-                    <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <Icon className="w-5 h-5 text-gray-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm">{cert.name}</h4>
-                        <p className="text-xs text-gray-500 mt-0.5">Certified {cert.year}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-                <Button variant="outline" className="w-full mt-4">
-                  View All Certifications
-                </Button>
-              </div>
-            </Card>
-          </div>
+          </Card> 
 
           {/* Social Links */}
           <Card className="p-6 mb-6">
