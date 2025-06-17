@@ -94,23 +94,22 @@ export function AdminSidebar({ className }) {
   return (
     <div
       className={cn(
-        "fixed left-0 top-0 h-full z-50 flex flex-col border-r bg-background transition-all duration-300",
-        !isOpen ? "w-0 -translate-x-full" : "w-[240px] translate-x-0",
+        "fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col border-r bg-background shadow-lg transition-transform duration-300",
+        isOpen ? "translate-x-0" : "-translate-x-full",
         className
       )}
     >
-      <div className="flex h-[60px] items-center justify-end border-b px-2">
+      <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-semibold">Menu</span>
+        </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={toggle}
-          className="h-8 w-8"
+          className="h-9 w-9 lg:hidden"
         >
-          {!isOpen ? (
-            <IoIosCloseCircleOutline className="size-6 mt-8" />
-          ) : (
-            <IoIosCloseCircleOutline className="size-6 mt-8" />
-          )}
+          <IoIosCloseCircleOutline className="h-5 w-5" />
         </Button>
       </div>
       <ScrollArea className="flex-1 overflow-hidden hover:overflow-auto">
