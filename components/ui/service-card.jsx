@@ -1,53 +1,56 @@
-import { Card, CardHeader, CardContent } from "./card";
-import { Badge } from "./badge";
-import { 
-  BiCode, 
-  BiCloud, 
-  BiRefresh, 
-  BiBuildings,
-  BiCodeBlock,
-  BiMobile,
-  BiData,
-  BiServer
-} from "react-icons/bi";
+import Image from "next/image";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-const iconMap = {
-  code: BiCode,
-  cloud: BiCloud,
-  "refresh-cw": BiRefresh,
-  building: BiBuildings,
-  "code-block": BiCodeBlock,
-  mobile: BiMobile,
-  data: BiData,
-  server: BiServer
-};
-
-export function ServiceCard({ service }) {
-  const { name, description, icon, features } = service;
-  const IconComponent = iconMap[icon] || BiCode;
-
+export function ServiceCard({ 
+  name, 
+  description, 
+  image, 
+  category,
+  features = [],
+  className = "" 
+}) {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border bg-card">
-      <CardHeader className="p-6 flex flex-row items-center gap-4">
-        <div className="p-3 bg-primary/10 rounded-xl">
-          <IconComponent className="h-8 w-8 text-primary" />
-        </div>
-        <h3 className="text-xl font-semibold">{name}</h3>
-      </CardHeader>
-      <CardContent className="p-6 pt-0">
-        <p className="text-muted-foreground mb-4 text-sm">{description}</p>
-        <div className="flex flex-wrap gap-2 mt-4">
-          {features?.map((feature, index) => (
-            <Badge 
-              key={index} 
-              variant="secondary"
-              className="px-3 py-1 bg-secondary/30 hover:bg-secondary/40"
-            >
-              {feature}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
+    <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${className}`}>
+      <div className="relative h-52 overflow-hidden bg-gray-100">
+        {image ? (
+          <Image
+            src={image}
+            alt={name}
+            fill
+            className="object-cover transform hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-400 text-4xl">No Image</span>
+          </div>
+        )}
+        {category && (
+          <Badge 
+            className="absolute top-3 right-3 bg-white/90 hover:bg-white text-gray-900 backdrop-blur-sm"
+          >
+            {category}
+          </Badge>
+        )}
+      </div>
+      <div className="p-5 space-y-3">
+        <h3 className="font-medium text-lg text-gray-900 line-clamp-1">{name}</h3>
+        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">{description}</p>
+        {features.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {features.map((feature, index) => (
+              <Badge 
+                key={index}
+                variant="outline" 
+                className="text-xs px-2 py-0.5 font-normal text-gray-600 bg-gray-50 border-gray-200 hover:bg-gray-100"
+              >
+                {feature}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

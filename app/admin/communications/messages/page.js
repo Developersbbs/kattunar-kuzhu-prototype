@@ -1,254 +1,165 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ScrollArea,
-  ScrollBar,
-} from "@/components/ui/scroll-area";
-import {
-  RiMessage2Line,
-  RiSearchLine,
-  RiMailLine,
-  RiFilter2Line,
-  RiSendPlaneLine,
-  RiTimeLine,
-  RiPushpinLine,
-  RiAttachment2,
-} from "react-icons/ri";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRouter } from "next/navigation";
+import { 
+  RiSearch2Line, 
+  RiMore2Fill, 
+  RiCheckDoubleLine, 
+  RiUser3Line, 
+  RiChatNewLine,
+  RiArrowLeftLine 
+} from 'react-icons/ri';
+import Image from 'next/image';
 
-// Mock data
-const messages = [
+// Mock data for users
+const users = [
   {
     id: 1,
-    subject: "Weekly Meeting Follow-up",
-    content: "Here are the action items from our last meeting...",
-    sender: "John Smith",
-    group: "Group 1",
-    date: "2025-06-17T10:30:00",
-    status: "read",
-    isPinned: true,
-    hasAttachments: true,
+    name: "John Smith",
+    business: "Tech Solutions",
+    lastMessage: "Thanks for the update",
+    time: "2m",
+    unread: 2,
+    online: true,
+    avatar: null,
   },
   {
     id: 2,
-    subject: "New Business Opportunity",
-    content: "I wanted to discuss a potential collaboration...",
-    sender: "Sarah Johnson",
-    group: "Group 2",
-    date: "2025-06-17T09:15:00",
-    status: "unread",
-    isPinned: false,
-    hasAttachments: false,
+    name: "Sarah Wilson",
+    business: "Creative Design",
+    lastMessage: "When is the next meeting?",
+    time: "1h",
+    unread: 0,
+    online: false,
+    avatar: null,
   },
   {
     id: 3,
-    subject: "Group Event Planning",
-    content: "Let's coordinate the upcoming networking event...",
-    sender: "Michael Brown",
-    group: "Group 1",
-    date: "2025-06-16T15:45:00",
-    status: "read",
-    isPinned: false,
-    hasAttachments: true,
+    name: "Mike Johnson",
+    business: "Local Restaurant",
+    lastMessage: "Got it, thanks!",
+    time: "2h",
+    unread: 1,
+    online: true,
+    avatar: null,
   },
 ];
 
-export default function MessagesPage() {
-  const [filter, setFilter] = useState({
-    status: "all",
-    group: "all",
-  });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMessage, setSelectedMessage] = useState(null);
+const MessagesPage = () => {
+  const router = useRouter();
+  const [search, setSearch] = useState("");
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true,
-    });
-  };
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.business.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div className="container max-w-7xl mx-auto">
-      <div className="flex h-[calc(100vh-6rem)]">
-        {/* Messages List */}
-        <div className="w-full lg:w-[400px] border-r flex flex-col">
-          {/* Header */}
-          <div className="p-4 border-b bg-gray-50">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-semibold">Messages</h1>
-              <Button className="bg-gray-900 text-white hover:bg-gray-800">
-                <RiMessage2Line className="mr-2 h-4 w-4" />
-                New Message
-              </Button>
-            </div>
-            
-            {/* Search */}
-            <div className="relative">
-              <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder="Search messages..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+    <div className="h-[100vh] flex flex-col bg-white">
+      {/* Header */}
+      <div className="bg-gray-900 text-white pt-12">
+        <div className="px-2 py-3">
+          <div className="flex items-center gap-2">
+            <button
+              className="p-2 hover:bg-gray-800 rounded-full"
+              onClick={() => router.back()}
+            >
+              <RiArrowLeftLine className="h-6 w-6" />
+            </button>
+            <h1 className="text-xl font-semibold flex-1">Messages</h1>
+            <button className="p-2 hover:bg-gray-800 rounded-full">
+              <RiSearch2Line className="w-6 h-6" />
+            </button>
+            <button className="p-2 hover:bg-gray-800 rounded-full">
+              <RiMore2Fill className="w-6 h-6" />
+            </button>
           </div>
-
-          {/* Filters */}
-          <div className="p-4 border-b">
-            <div className="flex gap-2">
-              <Select
-                value={filter.status}
-                onValueChange={(value) =>
-                  setFilter((prev) => ({ ...prev, status: value }))
-                }
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Messages</SelectItem>
-                  <SelectItem value="unread">Unread</SelectItem>
-                  <SelectItem value="read">Read</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setFilter({ status: "all", group: "all" })}
-              >
-                <RiFilter2Line className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Messages List */}
-          <ScrollArea className="flex-1">
-            <div className="divide-y">
-              {messages.map((message) => (
-                <button
-                  key={message.id}
-                  className={
-                    "w-full text-left p-4 hover:bg-gray-50 transition-colors " +
-                    (selectedMessage?.id === message.id ? "bg-gray-50" : "")
-                  }
-                  onClick={() => setSelectedMessage(message)}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={
-                          "font-medium " +
-                          (message.status === "unread" ? "" : "text-gray-600")
-                        }>
-                          {message.sender}
-                        </span>
-                        {message.isPinned && (
-                          <RiPushpinLine className="h-4 w-4 text-gray-400" />
-                        )}
-                      </div>
-                      <h3 className={
-                        "text-sm truncate " +
-                        (message.status === "unread" ? "font-medium" : "text-gray-600")
-                      }>
-                        {message.subject}
-                      </h3>
-                      <p className="text-sm text-gray-500 truncate mt-1">
-                        {message.content}
-                      </p>
-                    </div>
-                    <div className="text-xs text-gray-500 whitespace-nowrap">
-                      {formatDate(message.date)}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <ScrollBar />
-          </ScrollArea>
-        </div>
-
-        {/* Message View */}
-        <div className="hidden lg:flex flex-col flex-1">
-          {selectedMessage ? (
-            <>
-              <div className="p-6 border-b">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-xl font-semibold mb-1">
-                      {selectedMessage.subject}
-                    </h2>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <RiMailLine className="h-4 w-4" />
-                        {selectedMessage.sender}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <RiTimeLine className="h-4 w-4" />
-                        {formatDate(selectedMessage.date)}
-                      </span>
-                      {selectedMessage.hasAttachments && (
-                        <span className="flex items-center gap-1">
-                          <RiAttachment2 className="h-4 w-4" />
-                          Attachments
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline">
-                      Reply
-                    </Button>
-                    <Button variant="outline">
-                      Forward
-                    </Button>
-                  </div>
-                </div>
-                <Badge variant="outline">{selectedMessage.group}</Badge>
-              </div>
-              <ScrollArea className="flex-1 p-6">
-                <div className="max-w-3xl">
-                  <p className="text-gray-600 whitespace-pre-line">
-                    {selectedMessage.content}
-                  </p>
-                </div>
-                <ScrollBar />
-              </ScrollArea>
-              <div className="p-4 border-t bg-gray-50">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Type your reply..."
-                    className="flex-1"
-                  />
-                  <Button>
-                    <RiSendPlaneLine className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Select a message to view
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Search bar */}
+      <div className="px-4 py-2 bg-white border-b border-gray-100">
+        <div className="relative">
+          <RiSearch2Line className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Input
+            placeholder="Search chats"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 bg-gray-50 border-none rounded-full"
+          />
+        </div>
+      </div>
+
+      {/* Chat list */}
+      <ScrollArea className="flex-1">
+        <div className="divide-y divide-gray-100">
+          {filteredUsers.map((user) => (
+            <div
+              key={user.id}
+              className="hover:bg-gray-50 active:bg-gray-100 cursor-pointer transition-colors"
+              onClick={() => router.push(`/admin/communications/messages/${user.id}`)}
+            >
+              <div className="p-4 flex items-center gap-3">
+                {/* Avatar */}
+                <div className="relative">
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+                    {user.avatar ? (
+                      <Image 
+                        src={user.avatar} 
+                        alt={user.name}
+                        width={48}
+                        height={48}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <RiUser3Line className="w-7 h-7 text-gray-500" />
+                    )}
+                  </div>
+                  {user.online && (
+                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-gray-700 rounded-full border-2 border-white"></div>
+                  )}
+                </div>
+
+                {/* Chat info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900 truncate">{user.name}</h3>
+                    <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                      {user.time}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-1 text-sm text-gray-500 truncate">
+                      <RiCheckDoubleLine className={`w-4 h-4 ${user.unread ? 'text-gray-400' : 'text-gray-700'}`} />
+                      <span className="truncate">{user.lastMessage}</span>
+                    </div>
+                    {user.unread > 0 && (
+                      <span className="bg-gray-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {user.unread}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+
+      {/* New chat FAB */}
+      <button 
+        className="fixed right-4 bottom-4 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors"
+        onClick={() => {/* Handle new chat */}}
+      >
+        <RiChatNewLine className="w-6 h-6" />
+      </button>
     </div>
   );
-}
+};
+
+export default MessagesPage;

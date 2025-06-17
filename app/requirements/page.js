@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from "react-error-boundary";
@@ -45,6 +45,17 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { RequirementCard } from "@/components/ui/requirement-card";
+
 
 // Mock data moved outside component
 const mockRequirements = [
@@ -114,6 +125,34 @@ const mockResponses = [
   }
 ];
 
+// Mock members data for tagging
+const mockMembers = [
+  {
+    id: 1,
+    name: "John Doe",
+    company: "Tech Solutions",
+    category: "Technology",
+    location: "Chennai",
+    avatar: "/default-avatar.png"
+  },
+  {
+    id: 2,
+    name: "Sarah Wilson",
+    company: "Marketing Masters",
+    category: "Marketing",
+    location: "Chennai",
+    avatar: "/default-avatar.png"
+  },
+  {
+    id: 3,
+    name: "Mike Thompson",
+    company: "Real Estate Ventures",
+    category: "Real Estate",
+    location: "Chennai",
+    avatar: "/default-avatar.png"
+  }
+];
+
 // Error Fallback component
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
@@ -137,465 +176,533 @@ ErrorFallback.propTypes = {
   resetErrorBoundary: PropTypes.func.isRequired,
 };
 
-export default function RequirementsPage() {
-  return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={() => {
-        // Reset the state here
-      }}
-    >
-      <RequirementsPageContent />
-    </ErrorBoundary>
-  );
-}
+function NewRequirementDialog({ isOpen, onClose }) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [budget, setBudget] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [isPublic, setIsPublic] = useState(true);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [memberSearchOpen, setMemberSearchOpen] = useState(false);
+  const [memberSearchQuery, setMemberSearchQuery] = useState("");
 
-function RequirementsPageContent() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState("my-requirements");
-  const [showPostDialog, setShowPostDialog] = useState(false);
-  const [showResponseDialog, setShowResponseDialog] = useState(false);
-  const [selectedRequirement, setSelectedRequirement] = useState(null);
+  const filteredMembers = memberSearchQuery 
+    ? mockMembers.filter(member => 
+        member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+        member.company.toLowerCase().includes(memberSearchQuery.toLowerCase())
+      )
+    : mockMembers;
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "active":
-        return "bg-gray-800 text-white";
-      case "closed":
-        return "bg-gray-200 text-gray-700";
-      case "pending":
-        return "bg-gray-100 text-gray-600";
-      default:
-        return "bg-gray-100 text-gray-600";
+  const handleSelectMember = (member) => {
+    if (!selectedMembers.find(m => m.id === member.id)) {
+      setSelectedMembers([...selectedMembers, member]);
     }
+    setMemberSearchOpen(false);
   };
 
-  const RequirementCard = ({ requirement }) => (
-    <Card className="p-4 hover:border-gray-400 transition-colors" role="article">
-      <div className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium">{requirement.title}</h3>
-              {requirement.responses > 0 && (
-                <span className="px-1.5 py-0.5 bg-gray-800 text-white text-xs rounded-full" role="status">
-                  {requirement.responses} new
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-              <span aria-label="Budget">{requirement.budget}</span>
-              <span aria-hidden="true">•</span>
-              <span aria-label="Timeline">{requirement.timeline}</span>
-            </div>
-          </div>
-          <div 
-            className={`px-2 py-1 rounded-full text-xs ${getStatusColor(requirement.status)}`}
-            role="status"
-            aria-label={`Status: ${requirement.status}`}
-          >
-            {requirement.status.charAt(0).toUpperCase() + requirement.status.slice(1)}
-          </div>
-        </div>
-
-        <p className="text-sm text-gray-600 line-clamp-2">{requirement.description}</p>
-
-        <div className="flex flex-wrap gap-2" role="list" aria-label="Tags">
-          {requirement.tags.map((tag, index) => (
-            <div
-              key={index}
-              className="px-2 py-1 bg-gray-100 rounded-full text-xs text-gray-600 flex items-center gap-1"
-              role="listitem"
-            >
-              <Tag className="w-3 h-3" aria-hidden="true" />
-              <span>{tag}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between pt-2 border-t">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <div className="flex items-center gap-1" role="status" aria-label={`${requirement.views} views`}>
-              <Eye className="w-4 h-4" aria-hidden="true" />
-              <span>{requirement.views}</span>
-            </div>
-            <div className="flex items-center gap-1" role="status" aria-label={`${requirement.responses} responses`}>
-              <MessageCircle className="w-4 h-4" aria-hidden="true" />
-              <span>{requirement.responses}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8"
-              aria-label="Share requirement"
-            >
-              <Share className="w-4 h-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-8"
-              onClick={() => {
-                setSelectedRequirement(requirement);
-                setShowResponseDialog(true);
-              }}
-              aria-label="View responses"
-            >
-              View Responses
-            </Button>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-
-  RequirementCard.propTypes = {
-    requirement: PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      category: PropTypes.string.isRequired,
-      budget: PropTypes.string.isRequired,
-      timeline: PropTypes.string.isRequired,
-      status: PropTypes.oneOf(['active', 'closed', 'pending']).isRequired,
-      visibility: PropTypes.oneOf(['public', 'members']).isRequired,
-      responses: PropTypes.number.isRequired,
-      views: PropTypes.number.isRequired,
-      postedDate: PropTypes.string.isRequired,
-      tags: PropTypes.arrayOf(PropTypes.string).isRequired,
-      preferredMembers: PropTypes.arrayOf(PropTypes.string),
-    }).isRequired,
+  const handleRemoveMember = (memberId) => {
+    setSelectedMembers(selectedMembers.filter(m => m.id !== memberId));
   };
 
-  const PostRequirementDialog = () => {
-    const [formData, setFormData] = useState({
-      title: '',
-      description: '',
-      category: '',
-      budget: '',
-      timeline: '',
-      tags: '',
-      notify: false
-    });
-    const [errors, setErrors] = useState({});
-
-    const validateForm = () => {
-      const newErrors = {};
-      if (!formData.title.trim()) newErrors.title = 'Title is required';
-      if (!formData.description.trim()) newErrors.description = 'Description is required';
-      if (!formData.category) newErrors.category = 'Category is required';
-      if (!formData.budget.trim()) newErrors.budget = 'Budget is required';
-      if (!formData.timeline) newErrors.timeline = 'Timeline is required';
-      
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // In a real app, we would submit the data to an API
+    const newRequirement = {
+      id: mockRequirements.length + 1,
+      title,
+      description,
+      category,
+      budget,
+      timeline,
+      status: "active",
+      visibility: isPublic ? "public" : "members",
+      responses: 0,
+      views: 0,
+      postedDate: new Date().toISOString().split('T')[0],
+      preferredMembers: isPublic ? [] : selectedMembers.map(m => m.name)
     };
+    
+    // In a real app, this would be handled by state management
+    mockRequirements.push(newRequirement);
+    
+    // Reset form and close dialog
+    setTitle("");
+    setDescription("");
+    setCategory("");
+    setBudget("");
+    setTimeline("");
+    setIsPublic(true);
+    setSelectedMembers([]);
+    onClose();
+  };
 
-    const handleSubmit = () => {
-      if (validateForm()) {
-        // Handle form submission
-        console.log('Form submitted:', formData);
-        setShowPostDialog(false);
-      }
-    };
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>New Requirement</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter requirement title"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your requirement"
+              required
+            />
+          </div>
 
-    return (
-      <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
-        <DialogContent className="sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>Post a New Requirement</DialogTitle>
-            <DialogDescription>
-              Share your business requirements with the community
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-6 py-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                placeholder="Brief title for your requirement"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                aria-invalid={errors.title ? 'true' : 'false'}
-              />
-              {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Detailed description of what you're looking for..."
-                className="h-24"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                aria-invalid={errors.description ? 'true' : 'false'}
-              />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                >
-                  <SelectTrigger aria-invalid={errors.category ? 'true' : 'false'}>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="real-estate">Real Estate</SelectItem>
-                    <SelectItem value="services">Services</SelectItem>
-                    <SelectItem value="products">Products</SelectItem>
-                    <SelectItem value="hiring">Hiring</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="budget">Budget Range</Label>
-                <Input
-                  id="budget"
-                  placeholder="e.g., ₹50,000-80,000"
-                  value={formData.budget}
-                  onChange={(e) => setFormData(prev => ({ ...prev, budget: e.target.value }))}
-                  aria-invalid={errors.budget ? 'true' : 'false'}
-                />
-                {errors.budget && <p className="text-red-500 text-sm mt-1">{errors.budget}</p>}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="timeline">Timeline</Label>
-              <Select
-                value={formData.timeline}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, timeline: value }))}
-              >
-                <SelectTrigger aria-invalid={errors.timeline ? 'true' : 'false'}>
-                  <SelectValue placeholder="Select timeline" />
+              <Label htmlFor="category">Category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="immediate">Immediate</SelectItem>
-                  <SelectItem value="within-1-month">Within 1 month</SelectItem>
-                  <SelectItem value="within-3-months">Within 3 months</SelectItem>
-                  <SelectItem value="flexible">Flexible</SelectItem>
+                  <SelectItem value="Hiring">Hiring</SelectItem>
+                  <SelectItem value="Real Estate">Real Estate</SelectItem>
+                  <SelectItem value="Partnership">Partnership</SelectItem>
+                  <SelectItem value="Investment">Investment</SelectItem>
+                  <SelectItem value="Services">Services</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.timeline && <p className="text-red-500 text-sm mt-1">{errors.timeline}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
+              <Label htmlFor="budget">Budget</Label>
               <Input
-                id="tags"
-                placeholder="Add relevant tags separated by commas"
-                value={formData.tags}
-                onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                id="budget"
+                value={budget}
+                onChange={(e) => setBudget(e.target.value)}
+                placeholder="Enter budget"
               />
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="notify"
-                  checked={formData.notify}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, notify: checked }))}
-                />
-                <Label htmlFor="notify">Notify me of responses</Label>
-              </div>
-            </div>
           </div>
 
-          <div className="flex justify-end gap-3">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              className="bg-gray-900 hover:bg-gray-800"
-              onClick={handleSubmit}
-            >
-              Post Requirement
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="timeline">Timeline</Label>
+            <Input
+              id="timeline"
+              value={timeline}
+              onChange={(e) => setTimeline(e.target.value)}
+              placeholder="Enter timeline"
+            />
           </div>
-        </DialogContent>
-      </Dialog>
-    );
-  };
 
-  const ResponseDetailDialog = () => (
-    <Dialog open={showResponseDialog} onOpenChange={setShowResponseDialog}>
-      <DialogContent className="sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>Responses</DialogTitle>
-          <DialogDescription>
-            {selectedRequirement?.title}
-          </DialogDescription>
-        </DialogHeader>
+          <div className="flex items-center space-x-2 pt-2">
+            <Switch
+              id="public"
+              checked={isPublic}
+              onCheckedChange={setIsPublic}
+            />
+            <Label htmlFor="public">Public Requirement</Label>
+          </div>
 
-        <ScrollArea className="h-[400px] pr-4">
-          {mockResponses.map((response) => (
-            <div key={response.id} className="py-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{response.member.name}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {response.member.company}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    {response.proposal}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center mt-4">
-                <span className="text-sm text-gray-500">{response.date}</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">Message</Button>
-                  <Button
-                    className="bg-gray-900 hover:bg-gray-800"
-                    size="sm"
+          {!isPublic && (
+            <div className="space-y-2">
+              <Label>Tagged Members</Label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedMembers.map(member => (
+                  <Badge
+                    key={member.id}
+                    variant="secondary"
+                    className="flex items-center gap-1"
                   >
-                    Accept Proposal
-                  </Button>
-                </div>
+                    {member.name}
+                    <XCircle
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => handleRemoveMember(member.id)}
+                    />
+                  </Badge>
+                ))}
               </div>
-
-              <Separator className="mt-4" />
+              <div className="relative">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setMemberSearchOpen(true)}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Search members to tag
+                </Button>
+                <CommandDialog open={memberSearchOpen} onOpenChange={setMemberSearchOpen}>
+                  <CommandInput
+                    placeholder="Search members..."
+                    value={memberSearchQuery}
+                    onValueChange={setMemberSearchQuery}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No members found.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredMembers.map(member => (
+                        <CommandItem
+                          key={member.id}
+                          onSelect={() => handleSelectMember(member)}
+                        >
+                          <div className="flex items-center">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{member.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {member.company}
+                              </p>
+                            </div>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </CommandDialog>
+              </div>
             </div>
-          ))}
-        </ScrollArea>
+          )}
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit">Create Requirement</Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
+}
+
+export default function RequirementsPage() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showNewRequirementDialog, setShowNewRequirementDialog] = useState(false);
+  const [showResponseDetail, setShowResponseDetail] = useState(false);
+  const [selectedRequirement, setSelectedRequirement] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const filteredRequirements = mockRequirements.filter(req => {
+    const matchesSearch = searchQuery
+      ? req.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+
+    const matchesCategory = selectedCategory && selectedCategory !== 'all'
+      ? req.category === selectedCategory
+      : true;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const publicRequirements = filteredRequirements.filter(req => req.visibility === "public");
+  const taggedRequirements = filteredRequirements.filter(req => req.visibility === "members");
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-28">
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white border-b z-50">
-        <div className="px-5 pt-14 pb-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full -ml-2"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </Button>
-              <h1 className="text-xl font-semibold">Requirements</h1>
-            </div>
-            <Button
-              onClick={() => setShowPostDialog(true)}
-              className="bg-gray-900"
-            >
-              <Plus className="w-4 h-4 mr-1" />
-              Post
-            </Button>
+    <main className="container mx-auto p-4 space-y-6 pt-12">
+      {/* Header Section */}
+      <div className="flex flex-col gap-6">      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-gray-600 hover:text-gray-900"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Requirements</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Browse and manage requirements from members
+            </p>
           </div>
+          <Button
+            onClick={() => setShowNewRequirementDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Post Requirement
+          </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <Tabs defaultValue="my-requirements" className="w-full mt-28">
-        <div className="px-5 py-4 bg-white border-b">
-          <TabsList className="w-full">
-            <TabsTrigger value="my-requirements" className="flex-1">
-              My Requirements
-            </TabsTrigger>
-            <TabsTrigger value="responses" className="flex-1">
-              Responses
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* My Requirements Tab */}
-        <TabsContent value="my-requirements" className="mt-0 px-5 space-y-6">
-          {/* Search & Filter */}
-          <div className="flex items-center gap-2 sticky top-0 py-4 bg-gray-50">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search requirements..."
-                className="pl-9"
-              />
+        {/* Search and Filter Section */}
+        <Card className="p-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Search by title, description, or tags..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearching(true);
+                  }}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
-            </Button>
           </div>
 
-          {/* Requirements List */}
-          <div className="space-y-4">
-            {mockRequirements.map((requirement) => (
-              <RequirementCard key={requirement.id} requirement={requirement} />
-            ))}
-          </div>
+          {/* Active Filters */}
+          {(searchQuery || selectedCategory !== "all") && (
+            <div className="flex items-center gap-2 mt-4">
+              <span className="text-sm text-muted-foreground">Filters:</span>
+              <div className="flex flex-wrap gap-2">
+                {searchQuery && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Search: {searchQuery}
+                    <XCircle
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSearchQuery("")}
+                    />
+                  </Badge>
+                )}
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    Category: {selectedCategory}
+                    <XCircle
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSelectedCategory("all")}
+                    />
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Requirements List Section */}
+      <Tabs 
+        defaultValue="all" 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
+        <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+          <TabsTrigger value="all" className="data-[state=active]:bg-gray-900 data-[state=active]:text-white">
+            Public Requirements
+          </TabsTrigger>
+          <TabsTrigger value="tagged" className="data-[state=active]:bg-gray-900 data-[state=active]:text-white">
+            Tagged Requirements
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          {isSearching ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="text-sm text-muted-foreground mt-2">Searching requirements...</p>
+            </div>
+          ) : publicRequirements.length > 0 ? (
+            <>
+              <div className="text-sm text-muted-foreground mb-4">
+                Found {publicRequirements.length} public requirement{publicRequirements.length !== 1 ? 's' : ''}
+              </div>
+              <div className="grid gap-4">
+                {publicRequirements.map(requirement => (
+                  <RequirementCard
+                    key={requirement.id}
+                    requirement={requirement}
+                    onClick={() => {
+                      setSelectedRequirement(requirement);
+                      setShowResponseDetail(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <Card className="py-16">
+              <div className="text-center">
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No requirements found</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {searchQuery || selectedCategory !== "all"
+                    ? "Try adjusting your filters or search terms"
+                    : "No public requirements have been posted yet"}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowNewRequirementDialog(true)}
+                >
+                  Post a Requirement
+                </Button>
+              </div>
+            </Card>
+          )}
         </TabsContent>
 
-        {/* Responses Tab */}
-        <TabsContent value="responses" className="mt-0 px-5 py-6">
-          <div className="space-y-6">
-            {mockRequirements.map((requirement) => (
-              requirement.responses > 0 && (
-                <Card key={requirement.id} className="p-4">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-medium">{requirement.title}</h3>
-                      <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
-                        <span>₹{requirement.budget}</span>
-                        <span>•</span>
-                        <span>{requirement.responses} responses</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex -space-x-2">
-                        {mockResponses.slice(0, 3).map((response, index) => (
-                          <div
-                            key={index}
-                            className="w-8 h-8 rounded-full bg-gray-100 ring-2 ring-white flex items-center justify-center"
-                          >
-                            <span className="text-xs font-medium">
-                              {response.member.name[0]}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8"
-                        onClick={() => {
-                          setSelectedRequirement(requirement);
-                          setShowResponseDialog(true);
-                        }}
-                      >
-                        View Responses
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              )
-            ))}
-          </div>
+        <TabsContent value="tagged" className="space-y-4">
+          {isSearching ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="text-sm text-muted-foreground mt-2">Searching requirements...</p>
+            </div>
+          ) : taggedRequirements.length > 0 ? (
+            <>
+              <div className="text-sm text-muted-foreground mb-4">
+                Found {taggedRequirements.length} tagged requirement{taggedRequirements.length !== 1 ? 's' : ''}
+              </div>
+              <div className="grid gap-4">
+                {taggedRequirements.map(requirement => (
+                  <RequirementCard
+                    key={requirement.id}
+                    requirement={requirement}
+                    onClick={() => {
+                      setSelectedRequirement(requirement);
+                      setShowResponseDetail(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <Card className="py-16">
+              <div className="text-center">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No tagged requirements</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {searchQuery || selectedCategory !== "all"
+                    ? "Try adjusting your filters or search terms"
+                    : "No requirements have been tagged with members yet"}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowNewRequirementDialog(true)}
+                >
+                  Create Tagged Requirement
+                </Button>
+              </div>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
-
+      
       {/* Dialogs */}
-      <PostRequirementDialog />
-      <ResponseDetailDialog />
+      <NewRequirementDialog 
+        isOpen={showNewRequirementDialog} 
+        onClose={() => setShowNewRequirementDialog(false)} 
+      />
 
-      {/* Mobile Navigation */}
-      <MobileNav />
+      {selectedRequirement && (
+        <Dialog open={showResponseDetail} onOpenChange={setShowResponseDetail}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle>{selectedRequirement.title}</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[70vh]">
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <p className="text-gray-600">{selectedRequirement.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedRequirement.tags?.map(tag => (
+                      <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Budget</Label>
+                      <p>{selectedRequirement.budget}</p>
+                    </div>
+                    <div>
+                      <Label>Timeline</Label>
+                      <p>{selectedRequirement.timeline}</p>
+                    </div>
+                  </div>
+                  {selectedRequirement.preferredMembers && (
+                    <div>
+                      <Label>Preferred Members</Label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {selectedRequirement.preferredMembers.map(member => (
+                          <Badge key={member} variant="outline">{member}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Responses ({mockResponses.filter(r => r.requirementId === selectedRequirement.id).length})</h3>
+                  <div className="space-y-4">
+                    {mockResponses
+                      .filter(response => response.requirementId === selectedRequirement.id)
+                      .map(response => (
+                        <Card key={response.id} className="p-4">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h4 className="font-medium">{response.member.name}</h4>
+                                  <p className="text-sm text-muted-foreground">{response.member.company}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                                  <span className="text-sm font-medium">{response.member.rating}</span>
+                                  <Badge variant="outline" className="ml-2">
+                                    {response.member.completedDeals} deals
+                                  </Badge>
+                                </div>
+                              </div>
+                              <p className="text-sm">{response.proposal}</p>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <Label className="text-xs">Budget</Label>
+                                  <p className="font-medium">{response.budget}</p>
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Availability</Label>
+                                  <p className="font-medium">{response.availability}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+            
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowResponseDetail(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </main>
   );
 }

@@ -156,28 +156,36 @@ const businessData = {
   ],
   services: [
     {
+      id: 1,
       name: "Custom Software Development",
-      description: "End-to-end software solutions tailored to your business needs. We build scalable, secure, and maintainable applications using cutting-edge technologies.",
-      icon: "code",
-      features: ["Web Applications", "Mobile Apps", "API Development", "Custom CRM"]
+      description: "End-to-end custom software development services tailored to your business needs. We specialize in web applications, mobile apps, and enterprise solutions.",
+      image: "/images/services/software-dev.jpg",
+      category: "Development",
+      features: ["Web Apps", "Mobile Apps", "API Integration", "UI/UX Design"]
     },
     {
-      name: "Cloud Migration & DevOps",
-      description: "Seamless cloud migration and DevOps implementation. Optimize your infrastructure and streamline deployment processes.",
-      icon: "cloud",
-      features: ["AWS/Azure Migration", "CI/CD Pipeline", "Container Orchestration", "Infrastructure as Code"]
+      id: 2,
+      name: "Cloud Solutions",
+      description: "Comprehensive cloud services including migration, optimization, and management. We help businesses leverage the power of cloud computing.",
+      image: "/images/services/cloud.jpg",
+      category: "Cloud",
+      features: ["AWS", "Azure", "Migration", "DevOps"]
     },
     {
-      name: "Digital Transformation",
-      description: "Complete digital transformation consulting and implementation. Transform your business processes with modern digital solutions.",
-      icon: "refresh-cw",
-      features: ["Process Automation", "Digital Strategy", "Legacy Modernization", "Data Analytics"]
+      id: 3,
+      name: "IT Consulting",
+      description: "Strategic IT consulting to help businesses optimize their technology infrastructure and digital transformation journey.",
+      image: "/images/services/consulting.jpg",
+      category: "Consulting",
+      features: ["Digital Strategy", "Tech Architecture", "Process Optimization"]
     },
     {
-      name: "Enterprise Solutions",
-      description: "Scalable enterprise-grade software solutions. Comprehensive systems that grow with your business needs.",
-      icon: "building",
-      features: ["ERP Systems", "Business Intelligence", "Workflow Automation", "Enterprise Integration"]
+      id: 4,
+      name: "Managed IT Services",
+      description: "24/7 IT support and management services to keep your business running smoothly. Includes monitoring, maintenance, and security.",
+      image: "/images/services/managed-it.jpg",
+      category: "Support",
+      features: ["24/7 Support", "Security", "Maintenance", "Monitoring"]
     }
   ],
   certifications: [
@@ -215,6 +223,14 @@ const businessData = {
 export default function BusinessProfilePage({ params }) {
   const router = useRouter();
   const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "services", label: "Services" },
+    { id: "requirements", label: "Requirements" },
+    { id: "reviews", label: "Reviews" },
+  ];
 
   const ServicesSection = ({ services }) => {
     return (
@@ -454,10 +470,27 @@ export default function BusinessProfilePage({ params }) {
           </Card>
 
           {/* Services Section */}
-          <ServicesSection services={businessData.services} />
+          {activeTab === "services" && (
+            <div className="py-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {businessData.services.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    name={service.name}
+                    description={service.description}
+                    image={service.image}
+                    category={service.category}
+                    features={service.features}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
           
           {/* Requirements Section */}
-          <RequirementsSection requirements={businessData.requirements} />
+          {activeTab === "requirements" && (
+            <RequirementsSection requirements={businessData.requirements} />
+          )}
 
           {/* Stats and Testimonials */}
           <div className="grid grid-cols-1 gap-6">
