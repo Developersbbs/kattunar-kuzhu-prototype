@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { RiMenuFold4Line } from "react-icons/ri";
+import { AdminSidebar } from "@/components/admin-sidebar";
+import { useSidebar } from "@/lib/contexts/sidebar-context";
+import { SpeedDial } from "@/components/speed-dial";
 
 import {
   Bell,
@@ -205,9 +209,9 @@ const actionGroups = {
       icon: <Users className="w-5 h-5" />,
       items: [
         {
-          label: 'Manage Groups',
+          label: "Manage Groups",
           icon: <Settings className="w-4 h-4" />,
-          path: '/admin/groups',  // Links to our new groups management page
+          path: "/admin/groups", // Links to our new groups management page
         },
         {
           label: "Invite Member",
@@ -266,7 +270,7 @@ const actionGroups = {
 };
 
 // Enhanced SpeedDial Component with nested menus
-const SpeedDial = ({ isOpen, onClose, role }) => {
+const NestedSpeedDial = ({ isOpen, onClose, role }) => {
   const router = useRouter();
   const [activeGroup, setActiveGroup] = useState(null);
 
@@ -280,11 +284,15 @@ const SpeedDial = ({ isOpen, onClose, role }) => {
   };
 
   const actions = actionGroups[role] || [];
-  console.log('SpeedDial Props:', { isOpen, role, actionsCount: actions.length });
+  console.log("SpeedDial Props:", {
+    isOpen,
+    role,
+    actionsCount: actions.length,
+  });
 
   // Early return if no actions for role
   if (!actions.length) {
-    console.log('No actions found for role:', role);
+    console.log("No actions found for role:", role);
     return null;
   }
 
@@ -310,7 +318,9 @@ const SpeedDial = ({ isOpen, onClose, role }) => {
                         onClick={() => handleActionClick(item.path)}
                         className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transform transition-all duration-200 hover:scale-105"
                       >
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className="text-sm font-medium">
+                          {item.label}
+                        </span>
                         {item.icon}
                       </button>
                     ))}
@@ -350,7 +360,92 @@ const SpeedDial = ({ isOpen, onClose, role }) => {
   );
 };
 
+// Simplified SpeedDial Component with quick actions
+const QuickActionsSpeedDial = ({ isOpen, onClose }) => {
+  const router = useRouter();
+
+  const quickActions = [
+    {
+      label: "Schedule Meeting",
+      icon: <CalendarDays className="w-5 h-5" />,
+      path: "/meeting/schedule",
+      color: "bg-blue-500 hover:bg-blue-600",
+    },
+    {
+      label: "New Announcement",
+      icon: <Megaphone className="w-5 h-5" />,
+      path: "/admin/communications/announce",
+      color: "bg-purple-500 hover:bg-purple-600",
+    },
+    {
+      label: "Start Conversation",
+      icon: <MessageSquarePlus className="w-5 h-5" />,
+      path: "/admin/communications/messages",
+      color: "bg-green-500 hover:bg-green-600",
+    },
+  ];
+
+  return (
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+          onClick={onClose}
+        />
+      )}
+
+      {/* FAB and Menu */}
+      <div className="fixed right-4 bottom-20 z-50">
+        {/* Quick Actions */}
+        <div
+          className={cn(
+            "flex flex-col-reverse gap-2 mb-2 transition-all duration-200",
+            isOpen
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4 pointer-events-none"
+          )}
+        >
+          {quickActions.map((action, index) => (
+            <button
+              key={action.label}
+              onClick={() => {
+                router.push(action.path);
+                onClose();
+              }}
+              className={cn(
+                "flex items-center gap-3 px-4 py-2 rounded-full text-white shadow-lg transition-all duration-200",
+                action.color,
+                "translate-y-0 scale-100 opacity-100",
+                !isOpen && "translate-y-10 scale-90 opacity-0"
+              )}
+              style={{
+                transitionDelay: `${(quickActions.length - index) * 50}ms`,
+              }}
+            >
+              {action.icon}
+              <span className="text-sm font-medium">{action.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Main FAB Button */}
+        <button
+          onClick={() => !isOpen && onClose()}
+          className={cn(
+            "h-14 w-14 rounded-full bg-black text-white shadow-lg flex items-center justify-center transition-transform duration-200",
+            isOpen && "rotate-45"
+          )}
+        >
+          <Plus className="h-6 w-6" />
+        </button>
+      </div>
+    </>
+  );
+};
+
 export default function Dashboard() {
+  const { toggle, isOpen } = useSidebar();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMeetingAlert, setShowMeetingAlert] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -455,34 +550,44 @@ export default function Dashboard() {
   }, [isFabOpen]);
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-28">
+    <main className="min-h-screen bg-gray-50 pb-28 relative">
       {/* Profile Header */}
       <div className="bg-white px-5 pt-16 pb-6">
         <div className="flex items-center justify-between">
-          <Link href="/profile/business" className="flex items-center gap-3">
-            {/* Profile Image and Greeting */}
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                {user.image ? (
-                  <FaUser className="size-4" />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-lg font-medium text-gray-600">
-                      {user.name[0]}
-                    </span>
-                  </div>
-                )}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full hover:bg-gray-100"
+              onClick={toggle}
+            >
+              <RiMenuFold4Line className="size-5" />
+            </Button>
+            <Link href="/profile/business" className="flex items-center gap-3">
+              {/* Profile Image and Greeting */}
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                  {user.image ? (
+                    <FaUser className="size-4" />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-lg font-medium text-gray-600">
+                        {user.name[0]}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Greeting and Phone */}
-            <div>
-              <h1 className="text-base font-medium text-gray-900">
-                Good Morning, {user.name}
-              </h1>
-              <p className="text-sm text-gray-500 mt-0.5">{user.business}</p>
-            </div>
-          </Link>
+              {/* Greeting and Phone */}
+              <div>
+                <h1 className="text-base font-medium text-gray-900">
+                  Good Morning, {user.name}
+                </h1>
+                <p className="text-sm text-gray-500 mt-0.5">{user.business}</p>
+              </div>
+            </Link>
+          </div>
 
           {/* Notification Icon */}
           <Button
@@ -868,7 +973,9 @@ export default function Dashboard() {
                         10:00 AM
                       </div>
                     </div>
-                    <h4 className="text-sm font-medium mb-1">Product Showcase</h4>
+                    <h4 className="text-sm font-medium mb-1">
+                      Product Showcase
+                    </h4>
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Clock className="w-3 h-3" />
                       <span>10:00 AM - 11:30 AM</span>
@@ -894,7 +1001,6 @@ export default function Dashboard() {
       <SpeedDial
         isOpen={isFabOpen}
         onClose={() => setIsFabOpen(!isFabOpen)}
-        role={"SUPER_ADMIN"}
       />
 
       {/* Notification Panel (conditionally rendered) */}

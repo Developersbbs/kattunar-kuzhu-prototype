@@ -141,8 +141,7 @@ export default function MeetingStatisticsPage() {
             <Dialog open={showNewMeetingDialog} onOpenChange={setShowNewMeetingDialog}>
               <DialogTrigger asChild>
                 <Button className="bg-black text-white hover:bg-gray-800">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Schedule Meeting
+                  <Plus className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">

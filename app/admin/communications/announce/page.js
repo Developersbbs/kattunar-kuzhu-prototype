@@ -9,7 +9,8 @@ import {
   Users,
   MessageSquare,
   Send,
-  Filter
+  Filter,
+  Plus
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -31,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 
 // Mock announcements data
 const announcements = [
@@ -92,28 +94,28 @@ export default function AnnouncementsPage() {
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white border-b">
-        <div className="px-5 pt-14 pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="px-4 sm:px-5 pt-6 sm:pt-14 pb-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full"
                 onClick={() => router.back()}
               >
-                <ArrowLeft className="h-6 w-6" />
+                <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
-              <h1 className="text-xl font-semibold">Announcements</h1>
+              <h1 className="text-lg sm:text-xl font-semibold">Announcements</h1>
             </div>
             
             <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
               <DialogTrigger asChild>
                 <Button className="bg-black text-white hover:bg-gray-800">
-                  <Bell className="w-4 h-4 mr-2" />
-                  New Announcement
+                  <Plus className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">New Announcement</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[500px] w-[calc(100%-2rem)] p-4 sm:p-6">
                 <DialogHeader>
                   <DialogTitle>Create Announcement</DialogTitle>
                   <DialogDescription>
@@ -121,7 +123,7 @@ export default function AnnouncementsPage() {
                   </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleCreateAnnouncement} className="space-y-6">
+                <form onSubmit={handleCreateAnnouncement} className="space-y-4 sm:space-y-6">
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-2 block">
@@ -242,15 +244,19 @@ export default function AnnouncementsPage() {
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3">
+                  <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setShowNewDialog(false)}
+                      className="w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-black text-white hover:bg-gray-800">
+                    <Button 
+                      type="submit" 
+                      className="w-full sm:w-auto bg-black text-white hover:bg-gray-800"
+                    >
                       Send Announcement
                     </Button>
                   </div>
@@ -262,10 +268,10 @@ export default function AnnouncementsPage() {
       </div>
 
       {/* Filters */}
-      <div className="px-5 py-4">
-        <div className="flex gap-4">
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
+      <div className="px-4 sm:px-5 py-3 sm:py-4">
+        <div className="flex gap-2 sm:gap-4">
+          <Select defaultValue="all" className="w-full sm:w-[180px]">
+            <SelectTrigger>
               <SelectValue placeholder="Filter by priority" />
             </SelectTrigger>
             <SelectContent>
@@ -276,8 +282,8 @@ export default function AnnouncementsPage() {
             </SelectContent>
           </Select>
 
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
+          <Select defaultValue="all" className="w-full sm:w-[180px]">
+            <SelectTrigger>
               <SelectValue placeholder="Filter by scope" />
             </SelectTrigger>
             <SelectContent>
@@ -290,14 +296,14 @@ export default function AnnouncementsPage() {
       </div>
 
       {/* Announcements List */}
-      <div className="px-5 py-4">
-        <div className="space-y-4">
+      <div className="px-4 sm:px-5 py-3 sm:py-4">
+        <div className="space-y-3 sm:space-y-4">
           {announcements.map((announcement) => (
-            <Card key={announcement.id} className="p-4">
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
+            <Card key={announcement.id} className="p-3 sm:p-4">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+                    <div className="flex items-start sm:items-center gap-2 flex-wrap">
                       <h3 className="font-medium">{announcement.title}</h3>
                       <Badge
                         variant={
@@ -307,28 +313,26 @@ export default function AnnouncementsPage() {
                             ? "default"
                             : "secondary"
                         }
+                        className="inline-flex"
                       >
                         {announcement.priority}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {announcement.message}
-                    </p>
                   </div>
+                  <p className="text-sm text-gray-500 line-clamp-2 sm:line-clamp-none">
+                    {announcement.message}
+                  </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-500">
-                      By {announcement.sender}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {announcement.timestamp}
-                    </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t">
+                  <div className="flex items-center gap-3 text-xs sm:text-sm text-gray-500 flex-wrap">
+                    <span>By {announcement.sender}</span>
+                    <span className="hidden sm:inline">•</span>
+                    <span>{announcement.timestamp}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-500">
+                  <div className="flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
+                    <span className="text-xs sm:text-sm text-gray-500">
                       {announcement.readCount}/{announcement.totalRecipients} read
                     </span>
                   </div>
