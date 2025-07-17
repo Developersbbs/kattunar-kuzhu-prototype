@@ -404,8 +404,8 @@ export default function BusinessProfilePage({ params }) {
                       Message
                     </Button>
                     <Button variant="outline" size="sm" className="text-sm">
-                      <Users className="w-4 h-4 mr-1" />
-                      Connect
+                      <Phone className="w-4 h-4 mr-1" />
+                      Call Now
                     </Button>
                   </div>
                 </div>
