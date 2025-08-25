@@ -181,6 +181,7 @@ export default function MeetingsPage() {
                         <SelectValue placeholder="Select group" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="All">All</SelectItem>
                         <SelectItem value="group1">Group 1</SelectItem>
                         <SelectItem value="group2">Group 2</SelectItem>
                         <SelectItem value="group3">Group 3</SelectItem>

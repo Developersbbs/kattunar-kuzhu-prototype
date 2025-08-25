@@ -787,29 +787,6 @@ export default function BusinessProfilePage({ params }) {
               </Button>
             </div>
           </Card> 
-
-          {/* Social Links */}
-          <Card className="p-6 mb-6">
-            <h3 className="text-sm font-medium text-gray-500 mb-4">Connect</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                WhatsApp
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Facebook className="mr-2 h-4 w-4" />
-                Facebook
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Instagram className="mr-2 h-4 w-4" />
-                Instagram
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Linkedin className="mr-2 h-4 w-4" />
-                LinkedIn
-              </Button>
-            </div>
-          </Card>
         </div>
       </div>
 

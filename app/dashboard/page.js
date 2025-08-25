@@ -987,7 +987,7 @@ export default function Dashboard() {
                         className="h-7 px-4 text-xs font-medium hover:bg-gray-50"
                       >
                         Remind Me
-                      </Button>
+                      </Button>o
                     </div>
                   </div>
                 </Card>

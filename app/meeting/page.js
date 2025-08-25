@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IoMdArrowBack } from "react-icons/io";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import dynamic from 'next/dynamic';
-import L from 'leaflet';
 import {
   Dialog,
   DialogContent,
@@ -29,41 +28,14 @@ import { format } from "date-fns";
 import { MobileNav } from "@/components/mobile-nav";
 
 // Dynamically import map components to avoid SSR issues
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Circle = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Circle),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
+// Dynamically import react-leaflet components
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
+const Circle = dynamic(() => import("react-leaflet").then((mod) => mod.Circle), { ssr: false });
+const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false });
 
-// Custom marker icon setup
-const createIcon = (iconUrl) => {
-  return new L.Icon({
-    iconUrl,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-};
 
-// Default marker icon setup
-const defaultIcon = createIcon('https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png');
-L.Marker.prototype.options.icon = defaultIcon;
 
 // Mock data for meetings
 const meetings = [
@@ -136,6 +108,8 @@ export default function MeetingsPage() {
   const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
   const router = useRouter();
+
+  const [L, setL] = useState(null);
 
   // Function to check if a date has meetings
   const hasMeeting = (date) => {
@@ -412,6 +386,25 @@ export default function MeetingsPage() {
       </Card>
     );
   };
+
+    useEffect(() => {
+    (async () => {
+      const leaflet = await import("leaflet");
+      // Fix default icon setup only in browser
+      const defaultIcon = new leaflet.Icon({
+        iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      });
+      leaflet.Marker.prototype.options.icon = defaultIcon;
+      setL(leaflet);
+    })();
+  }, []);
+  
+  // wait until Leaflet is loaded
+  if (!L) return <p>Loading map...</p>;
 
   return (
     <main className="min-h-screen bg-gray-50 pb-28">
