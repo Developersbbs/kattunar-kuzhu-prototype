@@ -1,9 +1,17 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IoMdArrowBack } from "react-icons/io";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -23,6 +31,7 @@ import {
   Users,
   Check,
   X,
+  RotateCcwIcon
 } from "lucide-react";
 import { format } from "date-fns";
 import { MobileNav } from "@/components/mobile-nav";
@@ -42,7 +51,7 @@ const meetings = [
   {
     id: 1,
     type: "group",
-    title: "Weekly Business Network",
+    title: "Business Network",
     description:
       "Weekly meeting to discuss business opportunities and network with members",
     date: new Date(2025, 5, 14),
@@ -109,13 +118,124 @@ export default function MeetingsPage() {
   const [isMarkingAttendance, setIsMarkingAttendance] = useState(false);
   const router = useRouter();
 
+  // Selfie upload modal state
+  const [showSelfieDialog, setShowSelfieDialog] = useState(false);
+  const [selfieFile, setSelfieFile] = useState(null);
+  const [selfiePreview, setSelfiePreview] = useState(null);
+  const [isUploadingSelfie, setIsUploadingSelfie] = useState(false);
+
   const [L, setL] = useState(null);
+
+  // Reschedule modal state
+  const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
+  const [rescheduleShowCalendar, setRescheduleShowCalendar] = useState(false);
+  const [rescheduleData, setRescheduleData] = useState({
+    date: new Date(),
+    time: "10:00",
+    venue: "my_location",
+  });
 
   // Function to check if a date has meetings
   const hasMeeting = (date) => {
     return meetings.some(
       (meeting) =>
         format(meeting.date, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+    );
+  };
+
+  // Reschedule dialog
+  const RescheduleDialog = () => {
+    return (
+      <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Re-Schedule Meeting</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium block mb-1.5">Date</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setRescheduleShowCalendar(!rescheduleShowCalendar)}
+                >
+                  <Clock className="mr-2 h-4 w-4" />
+                  {format(rescheduleData.date, "MMM d, yyyy")}
+                </Button>
+              </div>
+              <div>
+                <label className="text-sm font-medium block mb-1.5">Time</label>
+                <Input
+                  type="time"
+                  required
+                  value={rescheduleData.time}
+                  onChange={(e) =>
+                    setRescheduleData({ ...rescheduleData, time: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            {rescheduleShowCalendar && (
+              <div className="border rounded-md p-2">
+                <Calendar
+                  mode="single"
+                  selected={rescheduleData.date}
+                  onSelect={(date) => {
+                    setRescheduleData({ ...rescheduleData, date: date || new Date() });
+                    setRescheduleShowCalendar(false);
+                  }}
+                  initialFocus
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="text-sm font-medium block mb-1.5">Venue</label>
+              <Select
+                value={rescheduleData.venue}
+                onValueChange={(value) =>
+                  setRescheduleData({ ...rescheduleData, venue: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="my_location">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>Your Location</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="their_location">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>Their Location</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="online">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>Other (add Manually)</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              className="w-full bg-black hover:bg-gray-800"
+              onClick={() => setShowRescheduleDialog(false)}
+            >
+              Confirm Reschedule
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     );
   };
 
@@ -272,6 +392,112 @@ export default function MeetingsPage() {
                 "Mark Attendance"
               )}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+  
+
+  // Selfie upload dialog
+  const SelfieDialog = () => {
+    const fileInputRef = useRef(null);
+
+    const handleFileChange = (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (selfiePreview) URL.revokeObjectURL(selfiePreview);
+      setSelfieFile(file);
+      setSelfiePreview(URL.createObjectURL(file));
+    };
+
+    const handleOpenCamera = () => {
+      fileInputRef.current?.click();
+    };
+
+    const handleRetake = () => {
+      if (selfiePreview) URL.revokeObjectURL(selfiePreview);
+      setSelfieFile(null);
+      setSelfiePreview(null);
+    };
+
+    const handleUpload = () => {
+      if (!selfieFile) return;
+      setIsUploadingSelfie(true);
+      // TODO: Replace with real API upload. Include file, meetingId, timestamp, location if needed.
+      setTimeout(() => {
+        setIsUploadingSelfie(false);
+        handleRetake();
+        setShowSelfieDialog(false);
+      }, 1500);
+    };
+
+    return (
+      <Dialog open={showSelfieDialog} onOpenChange={setShowSelfieDialog}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Upload Selfie</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Capture a selfie as proof of presence. Your camera will be used. On desktop, you can choose an image from your files.
+            </p>
+
+            {/* Hidden input for camera/gallery */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="user"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            {/* Preview or placeholder */}
+            {selfiePreview ? (
+              <div className="rounded-lg overflow-hidden border">
+                <img
+                  src={selfiePreview}
+                  alt="Selfie preview"
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+            ) : (
+              <div className="h-48 rounded-lg border border-dashed flex items-center justify-center text-gray-500">
+                <span className="text-sm">No photo selected</span>
+              </div>
+            )}
+
+            {/* Actions */}
+            {selfiePreview ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={handleRetake}
+                  disabled={isUploadingSelfie}
+                >
+                  Retake
+                </Button>
+                <Button
+                  className="flex-1 bg-black hover:bg-gray-800"
+                  onClick={handleUpload}
+                  disabled={isUploadingSelfie}
+                >
+                  {isUploadingSelfie ? "Uploading..." : "Upload"}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-black hover:bg-gray-800" onClick={handleOpenCamera}>
+                  Take Photo
+                </Button>
+                <Button variant="outline" className="flex-1" onClick={handleOpenCamera}>
+                  Choose from Gallery
+                </Button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -632,9 +858,10 @@ export default function MeetingsPage() {
                       size="sm"
                       variant="outline"
                       className="h-8 border-red-200 hover:bg-red-50 hover:text-red-600 flex-1"
+                      onClick={() => setShowRescheduleDialog(true)}
                     >
-                      <X className="w-4 h-4 mr-1" />
-                      Decline
+                      <RotateCcwIcon className="w-4 h-4 mr-1" />
+                      Re-Schedule
                     </Button>
                     <Button
                       size="sm"
@@ -662,8 +889,8 @@ export default function MeetingsPage() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="shrink-0 h-8">
-                      View Details
+                    <Button variant="ghost" size="sm" className="shrink-0 h-8" onClick={() => setShowSelfieDialog(true)}>
+                      Upload Selfie
                     </Button>
                   </div>
                 </Card>
@@ -678,7 +905,7 @@ export default function MeetingsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-medium">Business Proposal</h3>
-                      <div className="mt-2 space-y-1">
+                      <div className="mt-2 space-y-1">  
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
                           <span>June 10, 3:00 PM</span>
@@ -702,6 +929,12 @@ export default function MeetingsPage() {
 
       {/* Attendance Dialog */}
       <AttendanceDialog />
+
+      {/* Selfie Upload Dialog */}
+      <SelfieDialog />
+
+      {/* Reschedule Dialog */}
+      <RescheduleDialog />
 
       {/* Mobile Navigation */}
       <MobileNav />

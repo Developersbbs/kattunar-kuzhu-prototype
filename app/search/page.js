@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,27 +30,70 @@ export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
 
-  // Sample search suggestions
+  // Sample search suggestions (South India + Builders focus)
   const suggestions = {
     "Business Name": [
-      { id: 1, name: "Tech Solutions Inc", type: "business" },
-      { id: 2, name: "Healthcare Plus", type: "business" },
-      { id: 3, name: "Global Manufacturing", type: "business" },
+      { id: 1, name: "Sri Venkateswara Builders", type: "business" },
+      { id: 2, name: "Kaveri PEB Solutions", type: "business" },
+      { id: 3, name: "Madurai Modular Kitchens", type: "business" },
+      { id: 4, name: "Chola Waterproofing Co.", type: "business" },
+      { id: 5, name: "Namma Roofings & Fabricators", type: "business" },
+      { id: 6, name: "GreenLeaf Landscape Architects", type: "business" },
+      { id: 7, name: "Sai Sanitary & Bath Fittings", type: "business" },
+      { id: 8, name: "SmartNest Home Automation", type: "business" },
+      { id: 9, name: "Erode Glass & Aluminium Works", type: "business" },
+      { id: 10, name: "Trichy Painting Contractors", type: "business" },
+      { id: 11, name: "Solar Surya Installers", type: "business" },
+      { id: 12, name: "FireGuard Safety Systems", type: "business" },
+      { id: 13, name: "Coastal Civil Contractors", type: "business" },
+      { id: 14, name: "Interior Aura Designs", type: "business" },
+      { id: 15, name: "Tile & Marble Mart", type: "business" },
     ],
     "Owner Name": [
-      { id: 4, name: "John Doe", type: "owner" },
-      { id: 5, name: "Sarah Smith", type: "owner" },
-      { id: 6, name: "Raj Kumar", type: "owner" },
+      { id: 101, name: "Arun Prakash", type: "owner" },
+      { id: 102, name: "Lakshmi Narayanan", type: "owner" },
+      { id: 103, name: "Priya Subramanian", type: "owner" },
+      { id: 104, name: "Vignesh Kumar", type: "owner" },
+      { id: 105, name: "Anitha Ramesh", type: "owner" },
+      { id: 106, name: "Suresh Balaji", type: "owner" },
+      { id: 107, name: "Meena Iyer", type: "owner" },
+      { id: 108, name: "Karthik Rajendran", type: "owner" },
+      { id: 109, name: "Deepa Natarajan", type: "owner" },
+      { id: 110, name: "Harish Chandran", type: "owner" },
     ],
     Category: [
-      { id: 7, name: "IT & Software", type: "category" },
-      { id: 8, name: "Healthcare", type: "category" },
-      { id: 9, name: "Manufacturing", type: "category" },
+      // Referencing builder-related categories from auth/register page
+      { id: 201, name: "PEB Builders", type: "category" },
+      { id: 202, name: "Modular Kitchen Specialists", type: "category" },
+      { id: 203, name: "Waterproofing Contractors", type: "category" },
+      { id: 204, name: "Landscape Architects", type: "category" },
+      { id: 205, name: "Sanitaryware & Bathroom Fittings Suppliers", type: "category" },
+      { id: 206, name: "Smart Home Automation Services", type: "category" },
+      { id: 207, name: "Glass & Aluminium Fabricators", type: "category" },
+      { id: 208, name: "Painting Contractors", type: "category" },
+      { id: 209, name: "Solar Panel Installers", type: "category" },
+      { id: 210, name: "Fire Safety & Fire Fighting Contractors", type: "category" },
+      // Additional builder ecosystem categories
+      { id: 211, name: "Civil Contractors", type: "category" },
+      { id: 212, name: "Interior Designers", type: "category" },
+      { id: 213, name: "Roofing Contractors", type: "category" },
+      { id: 214, name: "Tile & Marble Suppliers", type: "category" },
     ],
     Location: [
-      { id: 10, name: "Chennai", type: "location" },
-      { id: 11, name: "Coimbatore", type: "location" },
-      { id: 12, name: "Madurai", type: "location" },
+      { id: 301, name: "T. Nagar", type: "location" },
+      { id: 302, name: "Adyar", type: "location" },
+      { id: 303, name: "Velachery", type: "location" },
+      { id: 304, name: "Anna Nagar", type: "location" },
+      { id: 305, name: "Tambaram", type: "location" },
+      { id: 306, name: "Porur", type: "location" },
+      { id: 307, name: "Sholinganallur (OMR)", type: "location" },
+      { id: 308, name: "Guindy", type: "location" },
+      { id: 309, name: "Nungambakkam", type: "location" },
+      { id: 310, name: "Mylapore", type: "location" },
+      { id: 311, name: "Ambattur", type: "location" },
+      { id: 312, name: "Royapuram", type: "location" },
+      { id: 313, name: "Perungudi", type: "location" },
+      { id: 314, name: "Avadi", type: "location" },
     ],
   };
 
@@ -102,20 +146,38 @@ export default function SearchPage() {
     {
       id: 1,
       type: "business",
-      name: "Tech Solutions Inc",
-      category: "IT & Software",
-      owner: "John Doe",
+      name: "Sri Venkateswara Builders",
+      category: "Civil Contractors",
+      owner: "Arun Prakash",
       location: "Chennai",
-      keywords: ["software", "consulting", "development"],  
+      keywords: ["builders", "civil", "construction"],
     },
     {
       id: 2,
       type: "business",
-      name: "Healthcare Plus",
-      category: "Healthcare",
-      owner: "Sarah Smith",
+      name: "Kaveri PEB Solutions",
+      category: "PEB Builders",
+      owner: "Lakshmi Narayanan",
       location: "Coimbatore",
-      keywords: ["healthcare", "medical", "consulting"],
+      keywords: ["peb", "steel", "industrial"],
+    },
+    {
+      id: 3,
+      type: "business",
+      name: "Madurai Modular Kitchens",
+      category: "Modular Kitchen Specialists",
+      owner: "Priya Subramanian",
+      location: "Madurai",
+      keywords: ["kitchen", "interiors", "modular"],
+    },
+    {
+      id: 4,
+      type: "business",
+      name: "Chola Waterproofing Co.",
+      category: "Waterproofing Contractors",
+      owner: "Vignesh Kumar",
+      location: "Tiruchirappalli",
+      keywords: ["waterproofing", "terrace", "leak"],
     },
   ];
 

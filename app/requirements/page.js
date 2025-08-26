@@ -513,7 +513,7 @@ export default function RequirementsPage() {
             Public Requirements
           </TabsTrigger>
           <TabsTrigger value="tagged" className="data-[state=active]:bg-gray-900 data-[state=active]:text-white">
-            Tagged Requirements
+            My Requirements
           </TabsTrigger>
         </TabsList>
 
@@ -590,7 +590,7 @@ export default function RequirementsPage() {
             <Card className="py-16">
               <div className="text-center">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No tagged requirements</h3>
+                <h3 className="text-lg font-medium mb-2">No My Requirements</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   {searchQuery || selectedCategory !== "all"
                     ? "Try adjusting your filters or search terms"

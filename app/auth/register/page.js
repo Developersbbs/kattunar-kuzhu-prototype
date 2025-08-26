@@ -37,27 +37,18 @@ const groups = Array.from({ length: 21 }, (_, i) => ({
 }));
 
 const categories = [
-	"Agricultural",
-	"Automotive",
-	"Banking & Finance",
-	"Construction",
-	"Education",
-	"Electronics",
-	"Fashion & Apparel",
-	"Food & Beverage",
-	"Healthcare",
-	"Home & Garden",
-	"Hospitality",
-	"IT & Software",
-	"Manufacturing",
-	"Real Estate",
-	"Retail",
-	"Services",
-	"Telecommunication",
-	"Transportation",
-	"Wholesale",
-	"Others",
+  "PEB Builders",
+  "Modular Kitchen Specialists",
+  "Waterproofing Contractors",
+  "Landscape Architects",
+  "Sanitaryware & Bathroom Fittings Suppliers",
+  "Smart Home Automation Services",
+  "Glass & Aluminium Fabricators",
+  "Painting Contractors",
+  "Solar Panel Installers",
+  "Fire Safety & Fire Fighting Contractors",
 ];
+
 
 export default function Register() {
 	const [currentStep, setCurrentStep] = useState(1);

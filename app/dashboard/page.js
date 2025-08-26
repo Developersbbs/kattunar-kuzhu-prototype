@@ -455,6 +455,8 @@ export default function Dashboard() {
   const alertRef = useRef(null);
   const touchStartY = useRef(0);
 
+  const router = useRouter();
+
   // Handle touch events for swipe to dismiss
   const handleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
@@ -480,8 +482,8 @@ export default function Dashboard() {
 
   // Mock user data - replace with real data later
   const user = {
-    name: "Jhones",
-    business: "ABC Tech Solutions",
+    name: "Arjunan",
+    business: "Sanguine Blue Business Solutions",
     image: "/path-to-avatar.jpg", // Add actual image path
     notifications: 2,
     stats: {
@@ -555,14 +557,14 @@ export default function Dashboard() {
       <div className="bg-white px-5 pt-16 pb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="h-10 w-10 rounded-full hover:bg-gray-100"
               onClick={toggle}
             >
               <RiMenuFold4Line className="size-5" />
-            </Button>
+            </Button> */}
             <Link href="/profile/business" className="flex items-center gap-3">
               {/* Profile Image and Greeting */}
               <div className="relative">
@@ -648,7 +650,7 @@ export default function Dashboard() {
                 {/* Meeting Details */}
                 <div className="space-y-2">
                   <h3 className="text-lg font-semibold">
-                    Weekly Business Meet
+                     Business Meet
                   </h3>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -675,8 +677,7 @@ export default function Dashboard() {
                 <Button
                   className="w-full mt-4 bg-white text-gray-900 hover:bg-gray-100"
                   onClick={() => {
-                    // Handle attendance marking
-                    console.log("Marking attendance");
+                    router.push('/meeting');
                   }}
                 >
                   Mark Attendance
@@ -886,12 +887,14 @@ export default function Dashboard() {
             {/* Referral Actions */}
             <div className="flex items-center gap-3">
               <Button
+                onClick={() => {router.push('/referrals')}}
                 variant="outline"
                 className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
               >
                 Given
               </Button>
               <Button
+                onClick={() => {router.push('/referrals')}}
                 variant="outline"
                 className="flex-1 rounded-full border-gray-200 hover:bg-gray-50 hover:text-black"
               >
